@@ -1,0 +1,51 @@
+:root {
+  --bg: #f7f8fa;
+  --text: #1c2430;
+  --muted: #5b6675;
+  --ok: #17803d;
+  --error: #b42318;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.home {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 4rem 1.25rem;
+}
+
+.home h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.home__subtitle {
+  margin: 0 0 2rem;
+  color: var(--muted);
+}
+
+.home__status {
+  margin: 0;
+  font-weight: 600;
+}
+
+.home__status--loading {
+  color: var(--muted);
+}
+
+.home__status--ok {
+  color: var(--ok);
+}
+
+.home__status--error {
+  color: var(--error);
+}
