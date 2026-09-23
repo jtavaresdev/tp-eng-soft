@@ -9,11 +9,22 @@
     "start": "node src/server.js"
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.5",
-    "dotenv": "^18.0.1",
-    "express": "^4.21.0"
+    "dotenv": "^18.0.3",
+    "express": "^4.21.0",
+    "prisma": "^7.10.0"
   },
   "engines": {
     "node": ">=20"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.0": true,
+    "prisma@7.10.0": true
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2"
   }
 }
