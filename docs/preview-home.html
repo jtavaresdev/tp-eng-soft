@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>SubFlow — pré-visualização</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --sf-blue: #1b1bf0;
+    --sf-paper: #ffffff;
+    --sf-alert: #ff5a36;
+    --sf-line-on-blue: rgba(255,255,255,0.28);
+    --sf-muted-on-blue: rgba(255,255,255,0.72);
+    --sf-font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+    --sf-font-body: 'IBM Plex Sans', system-ui, sans-serif;
+    box-sizing: border-box;
+  }
+  * { box-sizing: inherit; }
+  html, body { height: 100%; margin: 0; background: var(--sf-blue); }
+  body {
+    color: var(--sf-paper);
+    font-family: var(--sf-font-body);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    display: flex;
+    flex-direction: column;
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 2rem; border-bottom: 1px solid var(--sf-line-on-blue);
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .nav a { color: var(--sf-paper); text-decoration: none; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .nav__side { display: flex; gap: 2rem; flex: 1; }
+  .nav__side--right { justify-content: flex-end; }
+  .logo { font-family: var(--sf-font-display); font-size: 1.5rem; font-weight: 700; }
+  .btn {
+    display: inline-flex; align-items: center; padding: 0.75rem 1.5rem;
+    font-weight: 600; font-size: 0.875rem; border-radius: 2px; text-decoration: none;
+    cursor: pointer;
+  }
+  .btn--solid { background: var(--sf-paper); color: var(--sf-blue); border: 1px solid transparent; }
+  .btn--outline { background: transparent; color: var(--sf-paper); border: 1px solid var(--sf-line-on-blue); }
+  .hero {
+    flex: 1; display: grid; grid-template-columns: 1.1fr 0.9fr; align-items: center;
+    gap: 3rem; padding: 4rem 2rem;
+  }
+  .hero__title {
+    font-family: var(--sf-font-display); font-weight: 700; text-transform: uppercase;
+    font-size: clamp(2.5rem, 6vw, 5rem); line-height: 0.98; margin: 0 0 1.5rem;
+  }
+  .hero__subtitle { max-width: 32ch; color: var(--sf-muted-on-blue); font-size: 1.125rem; line-height: 1.5; margin: 0 0 2rem; }
+  .hero__actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .hero__graphic { width: 100%; max-width: 440px; justify-self: center; }
+  .hero__graphic svg { width: 100%; height: auto; }
+  .status { align-self: flex-end; margin: 0 2rem 1.5rem; font-size: 0.75rem; color: var(--sf-muted-on-blue); display: flex; align-items: center; gap: 0.5rem; }
+  .status__dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+  @media (max-width: 880px) {
+    .hero { grid-template-columns: 1fr; padding: 2.5rem 1.5rem; }
+    .hero__graphic { order: -1; max-width: 260px; justify-self: start; }
+  }
+</style>
+</head>
+<body>
+  <header class="nav">
+    <nav class="nav__side"><a href="#">Sobre</a><a href="#">Docs</a></nav>
+    <span class="logo">SubFlow</span>
+    <nav class="nav__side nav__side--right"><a href="#">GitHub</a><a href="#" class="btn btn--solid">Abrir painel</a></nav>
+  </header>
+
+  <main class="hero">
+    <div>
+      <h1 class="hero__title">Saiba sempre<br />com o que você<br />está gastando.</h1>
+      <p class="hero__subtitle">O SubFlow reúne todas as suas assinaturas em um só painel e avisa antes de cada cobrança, para nada te pegar de surpresa.</p>
+      <div class="hero__actions">
+        <a href="#" class="btn btn--solid">Abrir painel</a>
+        <a href="#" class="btn btn--outline">Ver documentação</a>
+      </div>
+    </div>
+    <div class="hero__graphic" aria-hidden="true">
+      <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" id="graphic"></svg>
+    </div>
+  </main>
+
+  <div class="status"><span class="status__dot"></span>API conectada</div>
+
+  <script>
+    // Gera o mesmo diagrama radial do componente HeroGraphic.jsx
+    const svg = document.getElementById('graphic');
+    const NS = 'http://www.w3.org/2000/svg';
+    const spokes = 14, center = 300, rInner = 46, rOuter = 260;
+    for (let i = 0; i < spokes; i++) {
+      const angle = (i / spokes) * Math.PI * 2;
+      const x1 = center + Math.cos(angle) * rInner;
+      const y1 = center + Math.sin(angle) * rInner;
+      const x2 = center + Math.cos(angle) * rOuter;
+      const y2 = center + Math.sin(angle) * rOuter;
+      const line = document.createElementNS(NS, 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('stroke', 'rgba(255,255,255,0.55)');
+      line.setAttribute('stroke-width', '1.5');
+      svg.appendChild(line);
+      const nx = center + Math.cos(angle) * (rOuter + 14);
+      const ny = center + Math.sin(angle) * (rOuter + 14);
+      const dot = document.createElementNS(NS, 'circle');
+      dot.setAttribute('cx', nx); dot.setAttribute('cy', ny); dot.setAttribute('r', 4);
+      dot.setAttribute('fill', '#ffffff');
+      svg.appendChild(dot);
+    }
+    const ring = document.createElementNS(NS, 'circle');
+    ring.setAttribute('cx', center); ring.setAttribute('cy', center); ring.setAttribute('r', rInner);
+    ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', '#ffffff'); ring.setAttribute('stroke-width', '2');
+    svg.appendChild(ring);
+  </script>
+</body>
+</html>
