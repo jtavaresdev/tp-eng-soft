@@ -1,0 +1,26 @@
+.sf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-1) var(--sf-space-3);
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-size-label);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.sf-badge--ativo {
+  background: var(--sf-blue-soft);
+  color: var(--sf-blue-deep);
+}
+
+.sf-badge--cancelado {
+  background: var(--sf-mist);
+  color: var(--sf-muted);
+}
+
+.sf-badge--alerta {
+  background: #ffe6de;
+  color: var(--sf-alert);
+}

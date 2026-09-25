@@ -1,0 +1,55 @@
+.sf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-3) var(--sf-space-6);
+  font-family: var(--sf-font-body);
+  font-weight: 600;
+  font-size: var(--sf-size-small);
+  line-height: 1;
+  border-radius: var(--sf-radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--sf-duration-fast) var(--sf-ease),
+    transform var(--sf-duration-fast) var(--sf-ease);
+}
+
+.sf-btn:active {
+  transform: scale(0.98);
+}
+
+.sf-btn:focus-visible {
+  outline: 2px solid var(--sf-alert);
+  outline-offset: 2px;
+}
+
+/* Padrão: sobre fundo claro (dashboard) */
+.sf-btn--solid {
+  background: var(--btn-bg, var(--sf-ink));
+  color: var(--btn-fg, var(--sf-paper));
+}
+.sf-btn--solid:hover {
+  background: var(--btn-bg-hover, var(--sf-blue));
+}
+
+.sf-btn--outline {
+  background: transparent;
+  color: var(--btn-fg, var(--sf-ink));
+  border-color: var(--btn-border, var(--sf-line));
+}
+.sf-btn--outline:hover {
+  background: var(--btn-hover-bg, var(--sf-mist));
+}
+
+/* Sobre fundo azul (hero, telas de marketing): inverte o contraste */
+.on-blue .sf-btn--solid {
+  --btn-bg: var(--sf-paper);
+  --btn-fg: var(--sf-blue);
+  --btn-bg-hover: var(--sf-blue-soft);
+}
+.on-blue .sf-btn--outline {
+  --btn-fg: var(--sf-paper);
+  --btn-border: var(--sf-line-on-blue);
+  --btn-hover-bg: rgba(255, 255, 255, 0.12);
+}
