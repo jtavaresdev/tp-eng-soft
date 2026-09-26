@@ -77,3 +77,21 @@ export function atualizarAssinatura(
 
   return buscarAssinaturaPorId(id);
 }
+
+export function cancelarAssinatura(id) {
+  const existente = db
+    .prepare('SELECT * FROM subscriptions WHERE id = ? AND status = ?')
+    .get(id, 'ativo');
+
+  if (!existente) {
+    return null;
+  }
+
+  db.prepare(`
+    UPDATE subscriptions
+    SET status = 'cancelado', cancelado_em = datetime('now')
+    WHERE id = ?
+  `).run(id);
+
+  return buscarAssinaturaPorId(id);
+}
