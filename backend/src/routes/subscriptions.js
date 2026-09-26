@@ -4,12 +4,14 @@ import {
   getSubscriptions,
   postSubscription,
   putSubscription,
+  getSummary,
 } from '../controllers/subscriptionsController.js';
 
 const router = Router();
 
 router.post('/', postSubscription);
 router.get('/', getSubscriptions);
+router.get('/summary', getSummary);
 router.put('/:id', putSubscription);
 router.delete('/:id', deleteSubscription);
 router.patch('/:id/cancel', deleteSubscription);

@@ -4,6 +4,7 @@ import {
   cancelarAssinatura,
   criarAssinatura,
   validarAssinatura,
+  calcularResumoMensal
 } from '../services/subscriptionsService.js';
 
 function parseId(rawId) {
@@ -54,4 +55,16 @@ export function deleteSubscription(req, res) {
   }
 
   return res.status(200).json(assinaturaCancelada);
+}
+
+export async function getSummary(req, res) {
+  try {
+    const resumo = await calcularResumoMensal();
+    return res.status(200).json(resumo);
+  } catch (error) {
+    console.error('[subscriptions/summary] Erro ao calcular resumo:', error);
+    return res.status(500).json({
+      error: 'Não foi possível calcular o resumo das assinaturas.',
+    });
+  }
 }
