@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom';
+import Nav from '../components/Nav.jsx';
 import Button from '../components/Button.jsx';
-import HeroGraphic from '../components/HeroGraphic.jsx';
+import heroImage from '../assets/hero.jpg';
 import useHealth from '../hooks/useHealth.js';
 import './Home.css';
 
@@ -14,23 +16,7 @@ export default function Home() {
 
   return (
     <div className="sf-page">
-      <header className="sf-nav on-blue">
-        <nav className="sf-nav__side">
-          <a href="#sobre">Sobre</a>
-          <a href="#docs">Docs</a>
-        </nav>
-
-        <span className="sf-nav__logo">SubFlow</span>
-
-        <nav className="sf-nav__side sf-nav__side--right">
-          <a href="https://github.com" target="_blank" rel="noreferrer">
-            GitHub
-          </a>
-          <Button as="a" href="#painel" variant="solid">
-            Abrir painel
-          </Button>
-        </nav>
-      </header>
+      <Nav tone="on-blue" ctaTo="/painel" ctaLabel="Abrir painel" />
 
       <main className="sf-hero on-blue">
         <div className="sf-hero__text">
@@ -46,7 +32,7 @@ export default function Home() {
             antes de cada cobrança, para nada te pegar de surpresa.
           </p>
           <div className="sf-hero__actions">
-            <Button as="a" href="#painel" variant="solid">
+            <Button as={Link} to="/painel" variant="solid">
               Abrir painel
             </Button>
             <Button as="a" href="#docs" variant="outline">
@@ -55,8 +41,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="sf-hero__graphic" aria-hidden="true">
-          <HeroGraphic />
+        <div className="sf-hero__graphic">
+          <img src={heroImage} alt="Ilustração do SubFlow" className="sf-hero__image" />
         </div>
       </main>
 

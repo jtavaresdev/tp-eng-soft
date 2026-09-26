@@ -18,3 +18,14 @@ export async function request(path, options = {}) {
 export function getHealth() {
   return request('/health');
 }
+
+export function listSubscriptions(status = 'ativo') {
+  return request(`/subscriptions?status=${status}`);
+}
+
+export function createSubscription(dados) {
+  return request('/subscriptions', {
+    method: 'POST',
+    body: JSON.stringify(dados),
+  });
+}
