@@ -1,3 +1,4 @@
+import { getResumoAssinaturasAtivas } from '../repositories/subscriptionRepository.js';
 import db from '../db/index.js';
 
 export const CATEGORIAS_VALIDAS = [
@@ -94,4 +95,16 @@ export function cancelarAssinatura(id) {
   `).run(id);
 
   return buscarAssinaturaPorId(id);
+}
+
+
+export async function calcularResumoMensal() {
+  const { somaValor, quantidade } = await getResumoAssinaturasAtivas();
+ 
+  const totalMensal = somaValor ? Number(somaValor.toFixed(2)) : 0;
+ 
+  return {
+    totalMensal,
+    quantidadeAtivas: quantidade,
+  };
 }
