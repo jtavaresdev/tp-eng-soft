@@ -1,21 +1,57 @@
-import { validarNovaAssinatura, criarAssinatura, buscarAssinaturas } from '../services/subscriptionsService.js';
+import {
+  atualizarAssinatura,
+  buscarAssinaturas,
+  cancelarAssinatura,
+  criarAssinatura,
+  validarAssinatura,
+} from '../services/subscriptionsService.js';
+
+function parseId(rawId) {
+  const id = Number(rawId);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
 
 export function getSubscriptions(req, res) {
   const status = req.query.status || 'ativo';
-  const assinaturas = buscarAssinaturas(status);
-  res.json(assinaturas);
+  res.json(buscarAssinaturas(status));
 }
 
 export function postSubscription(req, res) {
-  const dados = req.body;
-
-  const erros = validarNovaAssinatura(dados);
+  const dados = req.body || {};
+  const erros = validarAssinatura(dados);
 
   if (erros.length > 0) {
     return res.status(400).json({ error: erros[0] });
   }
 
-  const novaAssinatura = criarAssinatura(dados);
+  return res.status(201).json(criarAssinatura(dados));
+}
 
-  res.status(201).json(novaAssinatura);
+export function putSubscription(req, res) {
+  const dados = req.body || {};
+  const erros = validarAssinatura(dados);
+
+  if (erros.length > 0) {
+    return res.status(400).json({ error: erros[0] });
+  }
+
+  const id = parseId(req.params.id);
+  const assinaturaAtualizada = id === null ? null : atualizarAssinatura(id, dados);
+
+  if (!assinaturaAtualizada) {
+    return res.status(404).json({ error: 'Assinatura não encontrada' });
+  }
+
+  return res.status(200).json(assinaturaAtualizada);
+}
+
+export function deleteSubscription(req, res) {
+  const id = parseId(req.params.id);
+  const assinaturaCancelada = id === null ? null : cancelarAssinatura(id);
+
+  if (!assinaturaCancelada) {
+    return res.status(404).json({ error: 'Assinatura não encontrada' });
+  }
+
+  return res.status(200).json(assinaturaCancelada);
 }

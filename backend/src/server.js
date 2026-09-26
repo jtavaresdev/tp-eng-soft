@@ -13,6 +13,7 @@ app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json());
 
 app.use('/health', healthRouter);
+app.use('/subscriptions', subscriptionsRouter);
 
 // Colocar rotas aqui
 app.use('/subscriptions', subscriptionsRouter);
