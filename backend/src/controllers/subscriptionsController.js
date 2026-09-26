@@ -1,6 +1,7 @@
 import {
   atualizarAssinatura,
   buscarAssinaturas,
+  cancelarAssinatura,
   criarAssinatura,
   validarAssinatura,
 } from '../services/subscriptionsService.js';
@@ -42,4 +43,15 @@ export function putSubscription(req, res) {
   }
 
   return res.status(200).json(assinaturaAtualizada);
+}
+
+export function deleteSubscription(req, res) {
+  const id = parseId(req.params.id);
+  const assinaturaCancelada = id === null ? null : cancelarAssinatura(id);
+
+  if (!assinaturaCancelada) {
+    return res.status(404).json({ error: 'Assinatura não encontrada' });
+  }
+
+  return res.status(200).json(assinaturaCancelada);
 }
