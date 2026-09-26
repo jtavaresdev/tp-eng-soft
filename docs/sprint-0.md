@@ -27,54 +27,61 @@
 | status | VARCHAR | ativo / cancelado |
 | criado_em | TIMESTAMP | Data de cadastro |
 
-**Categorias:** [DECISÃO: enum fixo no código (streaming, produtividade, jogos, academia, outros) OU tabela `categories` separada]
-> Preencher: __________________________________________
+<!-- **Categorias:** [DECISÃO: enum fixo no código (streaming, produtividade, jogos, academia, outros) OU tabela `categories` separada] -->
+> **Decisão:** Enum fixo no código (streaming, produtividade, jogos, academia, outros).
+> **Justificativa:** Reduz a complexidade de rotas/CRUDs adicionais no backend e no frontend, otimizando o tempo de entrega das histórias da Sprint 1.
 
 ### 1.2 Autenticação
 
 [DECISÃO: sistema single-user, sem login, para focar no escopo das 8 histórias / OU autenticação básica com JWT]
-> Preencher: __________________________________________
-> Justificativa: __________________________________________
+> **Decisão:** Sistema *single-user* (sem login/autenticação).
+> **Justificativa:** Como o prazo da entrega é curto, optamos por não implementar autenticação, controle de sessões, criptografia de senhas e tokens JWT nesta sprint. Isso garante que o foco total do time seja direcionado à entrega de um produto mínimo viável (MVP) funcional até ao final da sprint.
 
 ### 1.3 Notificações
 
-- Canal obrigatório: [e-mail via Nodemailer / Telegram Bot API]
+<!-- - Canal obrigatório: [e-mail via Nodemailer / Telegram Bot API]
 - Canal stretch goal (se sobrar tempo): __________________________________________
 - Regra de disparo: notificar X dias antes da data de cobrança → **X = ___**
-- Frequência do job (node-cron): __________________________________________
+- Frequência do job (node-cron): __________________________________________ -->
+
+- Canal obrigatório: e-mail via Nodemailer (ou Telegram Bot API)
+- Canal stretch goal (se sobrar tempo): Telegram Bot API (caso Nodemailer seja o principal)
+- Regra de disparo: notificar X dias antes da data de cobrança → **X = 3**
+- Frequência do job (node-cron): Execução diária à meia-noite (`0 0 * * *`)
 
 ### 1.4 Frontend
 
 - Biblioteca de gráficos: [Chart.js / Recharts]
 - Estrutura de pastas (sugestão): `src/components`, `src/pages`, `src/services`, `src/hooks`
-- Estilização: __________________________________________
+- Estilização: CSS Puro com Design Tokens (Variáveis CSS customizadas em `src/styles/tokens.css`)
 
 ### 1.5 Ambiente
 
 - Banco em desenvolvimento: SQLite
-- Banco em produção/entrega: PostgreSQL (se aplicável)
-- Variáveis de ambiente (.env): __________________________________________
+- Banco em produção/entrega: PostgreSQL (migração planejada para uma próxima sprint/entrega futura)
+- Variáveis de ambiente (.env): `PORT`, `DATABASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+> **Justificativa de Ambiente:** O SQLite foi escolhido para o desenvolvimento atual por não exigir infraestrutura/containers complexos e permitir uma configuração e inicialização extremamente rápida por parte do time. A troca para PostgreSQL fica agendada para sprints futuras caso haja necessidade de produção.
 
 ---
 
 ## 2. Definition of Ready (DoR)
 
 Uma issue pode entrar na coluna **Ready** quando:
-- [ ] Possui título claro e descrição do que deve ser feito
+- [x] Possui título claro e descrição do que deve ser feito
 - [ ] Critério de aceite está descrito
-- [ ] Não possui dependência bloqueada por outra issue
+- [x] Não possui dependência bloqueada por outra issue
 - [ ] Estimativa em story points definida
 - [ ] Está vinculada à história de usuário correspondente
 
 ## 3. Definition of Done (DoD)
 
 Uma issue é considerada **Done** quando:
-- [ ] Código implementado e funcional
+- [x] Código implementado e funcional
 - [ ] Pull Request aberto, vinculado à issue
 - [ ] PR revisado e aprovado por pelo menos outro dev do time
-- [ ] Mergeado na branch principal
+- [x] Mergeado na branch principal
 - [ ] Critério de aceite validado manualmente (teste exploratório)
-- [ ] Sem erros no console / build quebrado
+- [x] Sem erros no console / build quebrado
 
 ---
 
@@ -93,7 +100,7 @@ Uma issue é considerada **Done** quando:
 
 **Total de Story Points:** 32
 
-> Dev A / B / C / D = substituir pelos nomes reais do time.
+<!-- > Dev A / B / C / D = substituir pelos nomes reais do time. -->
 
 ---
 
