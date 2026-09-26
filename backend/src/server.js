@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import healthRouter from './routes/health.js';
+import subscriptionsRouter from './routes/subscriptions.js';
 
 const app = express();
 
@@ -12,6 +13,9 @@ app.use(cors({ origin: CORS_ORIGIN }));
 app.use(express.json());
 
 app.use('/health', healthRouter);
+
+// Colocar rotas aqui
+app.use('/subscriptions', subscriptionsRouter);
 
 // Rota não encontrada
 app.use((req, res) => {
