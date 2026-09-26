@@ -1,0 +1,103 @@
+.sf-page {
+  min-height: 100vh;
+  background: var(--sf-blue);
+  color: var(--sf-paper);
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* --- Hero --- */
+.sf-hero {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: start;
+  gap: var(--sf-space-12);
+  padding: var(--sf-space-8) var(--sf-space-8) var(--sf-space-16);
+}
+
+.sf-hero__title {
+  font-family: var(--sf-font-serif);
+  font-weight: 700;
+  font-size: 450%;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--sf-space-6);
+  text-transform: uppercase;
+}
+
+.sf-hero__subtitle {
+  font-family: var(--sf-font-body);
+  font-size: 1.125rem;
+  line-height: 1.5;
+  max-width: 32ch;
+  color: var(--sf-muted-on-blue);
+  margin: 0 0 var(--sf-space-8);
+}
+
+.sf-hero__actions {
+  display: flex;
+  gap: var(--sf-space-4);
+  flex-wrap: wrap;
+}
+
+.sf-hero__graphic {
+  width: 100%;
+  max-width: 350%;
+  justify-self: center;
+}
+
+.sf-hero__image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* --- Status da API (discreto, canto inferior) --- */
+.sf-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  align-self: flex-end;
+  margin: 0 var(--sf-space-8) var(--sf-space-6);
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-size-label);
+  color: var(--sf-muted-on-blue);
+}
+
+.sf-status__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sf-muted-on-blue);
+}
+
+.sf-status__dot--ok {
+  background: #4ade80;
+}
+
+.sf-status__dot--error {
+  background: var(--sf-alert);
+}
+
+/* --- Responsivo --- */
+@media (max-width: 880px) {
+  .sf-hero {
+    grid-template-columns: 1fr;
+    padding: var(--sf-space-8) var(--sf-space-6);
+    text-align: left;
+  }
+
+  .sf-hero__graphic {
+    order: -1;
+    max-width: 200px;
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}
