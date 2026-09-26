@@ -10,6 +10,9 @@ node_modules/
 *.db
 *.db-journal
 
+dev.db-shm
+dev.db-wal
+
 # Logs
 *.log
 npm-debug.log*
