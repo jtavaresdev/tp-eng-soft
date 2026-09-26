@@ -21,6 +21,7 @@
 
   /* --- Tipografia --- */
   --sf-font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --sf-font-serif: 'Bodoni Moda', 'Times New Roman', serif; /* título do hero */
   --sf-font-body: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
 
   --sf-size-hero: clamp(2.75rem, 6vw, 5.5rem);

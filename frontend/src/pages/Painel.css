@@ -1,0 +1,86 @@
+.sf-painel {
+  min-height: 100vh;
+  background: var(--sf-paper);
+  color: var(--sf-ink);
+}
+
+/* Deixa os botões sólidos dentro do painel na cor da marca
+   (em vez do --sf-ink escuro que é o padrão do Button em outros contextos) */
+.sf-painel .sf-btn--solid {
+  --btn-bg: var(--sf-blue);
+  --btn-bg-hover: var(--sf-blue-deep);
+}
+
+.sf-painel__content {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--sf-space-8);
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--sf-space-8);
+}
+
+.sf-painel__card {
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-top: 3px solid var(--sf-blue);
+  border-radius: var(--sf-radius-md);
+  padding: var(--sf-space-6);
+}
+
+.sf-painel h1,
+.sf-painel h2 {
+  font-family: var(--sf-font-display);
+  font-weight: 700;
+  font-size: var(--sf-size-h2);
+  color: var(--sf-blue);
+  margin: 0 0 var(--sf-space-4);
+}
+
+.sf-painel__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+}
+
+.sf-painel__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-3);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-size-small);
+}
+
+.sf-painel__item-nome {
+  font-weight: 600;
+  color: var(--sf-ink);
+}
+
+.sf-painel__item-valor {
+  color: var(--sf-blue-deep);
+  font-weight: 600;
+}
+
+.sf-painel__aviso {
+  font-family: var(--sf-font-body);
+  color: var(--sf-muted);
+  font-size: var(--sf-size-small);
+}
+
+.sf-painel__erro {
+  font-family: var(--sf-font-body);
+  color: var(--sf-alert);
+  font-size: var(--sf-size-small);
+}
+
+@media (max-width: 880px) {
+  .sf-painel__content {
+    grid-template-columns: 1fr;
+  }
+}
