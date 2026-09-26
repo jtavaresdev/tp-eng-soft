@@ -64,6 +64,74 @@ O projeto é desenvolvido seguindo o framework **Scrum**, com:
 ---
 
 ## Como Executar o Projeto
-[TODO]
+
+### 📋 0. Pré-requisitos
+
+Garante que tenha instalado no teu ambiente:
+* **Node.js** (versão LTS recomendada)
+* **npm** ou **yarn**
+* **Git**
+
+### 🛠️ 1. Passo a Passo - Backend
+
+1. **Entrar no diretório do backend:**
+   ```bash
+   cd backend
+   ```
+
+2. **Instalar as dependências:**
+   ```bash
+   npm install
+   ```
+
+3. **Configurar as Variáveis de Ambiente:**
+   Copie o `.env.example` para `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   *Abra `.env` criado e ajuste a string de conexão da base de dados (caso necessário) e/ou credenciais de notificação (Nodemailer / Telegram Bot).*
+
+4. **Sincronizar a base de dados (Prisma):**
+   ```bash
+   npx prisma migrate dev
+   ```
+
+5. **Iniciar o servidor do Backend:**
+   ```bash
+   npm run dev
+   ```
+
+6. **Teste o servidor:**
+   ```bash
+   http://localhost:3001
+   ```
+
+### 💻 2. Passo a Passo - Frontend
+
+1. **Abrir um novo terminal e entrar no diretório do frontend:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Configurar as Variáveis de Ambiente:**
+   Copie o `.env.example` para `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Instalar as dependências:**
+   ```bash
+   npm install
+   ```
+
+4. **Iniciar a aplicação React:**
+   ```bash
+   npm run dev
+   ```
+
+### 📌 Links de Acesso Local
+
+* **Backend:** http://localhost:3001 (ou em outra porta definida no `.env`)
+* **Frontend:** http://localhost:5173
 
 ```
