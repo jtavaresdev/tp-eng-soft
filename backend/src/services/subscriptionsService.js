@@ -42,3 +42,8 @@ export function criarAssinatura({ nome, valor, data_cobranca, categoria }) {
 export function buscarAssinaturaPorId(id) {
   return db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(id);
 }
+
+export function buscarAssinaturas(status = "ativo") {
+  return db.prepare('SELECT * FROM subscriptions WHERE status = ? ORDER BY data_cobranca;')
+    .all(status);
+}

@@ -1,4 +1,10 @@
-import { validarNovaAssinatura, criarAssinatura } from '../services/subscriptionsService.js';
+import { validarNovaAssinatura, criarAssinatura, buscarAssinaturas } from '../services/subscriptionsService.js';
+
+export function getSubscriptions(req, res) {
+  const status = req.query.status || 'ativo';
+  const assinaturas = buscarAssinaturas(status);
+  res.json(assinaturas);
+}
 
 export function postSubscription(req, res) {
   const dados = req.body;
