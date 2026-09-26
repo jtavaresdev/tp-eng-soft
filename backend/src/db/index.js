@@ -1,21 +1,28 @@
-// Este arquivo tem UM trabalho: abrir (ou criar) o banco SQLite e
-// garantir que a tabela "subscriptions" existe. Todo o resto do
-// backend importa o "db" daqui — nunca abrimos o banco em outro lugar.
-
+import 'dotenv/config';
 import Database from 'better-sqlite3';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const backendRoot = path.resolve(__dirname, '../..');
 
-const dbPath = process.env.DB_PATH;
+function getDatabasePath() {
+  const configuredPath = process.env.DATABASE_URL || process.env.DB_PATH || 'file:./dev.db';
+  const sqlitePath = configuredPath.replace(/^file:/, '').split('?')[0];
 
-fs.mkdirSync(dirname(dbPath), { recursive: true });
+  return path.isAbsolute(sqlitePath)
+    ? sqlitePath
+    : path.resolve(backendRoot, sqlitePath);
+}
+
+const dbPath = getDatabasePath();
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 
+// Garante que a API também funcione em um banco SQLite recém-criado.
 db.exec(`
   CREATE TABLE IF NOT EXISTS subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

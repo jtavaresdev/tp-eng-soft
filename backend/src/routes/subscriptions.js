@@ -1,10 +1,17 @@
 import { Router } from 'express';
-import { postSubscription, getSubscriptions } from '../controllers/subscriptionsController.js';
+import {
+  deleteSubscription,
+  getSubscriptions,
+  postSubscription,
+  putSubscription,
+} from '../controllers/subscriptionsController.js';
 
 const router = Router();
 
-// POST /subscriptions  ->  cria uma assinatura nova
 router.post('/', postSubscription);
 router.get('/', getSubscriptions);
+router.put('/:id', putSubscription);
+router.delete('/:id', deleteSubscription);
+router.patch('/:id/cancel', deleteSubscription);
 
 export default router;
