@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  deleteSubscription,
   getSubscriptions,
   postSubscription,
   putSubscription,
@@ -10,5 +11,7 @@ const router = Router();
 router.post('/', postSubscription);
 router.get('/', getSubscriptions);
 router.put('/:id', putSubscription);
+router.delete('/:id', deleteSubscription);
+router.patch('/:id/cancel', deleteSubscription);
 
 export default router;
