@@ -1,0 +1,45 @@
+import {
+  atualizarAssinatura,
+  buscarAssinaturas,
+  criarAssinatura,
+  validarAssinatura,
+} from '../services/subscriptionsService.js';
+
+function parseId(rawId) {
+  const id = Number(rawId);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+export function getSubscriptions(req, res) {
+  const status = req.query.status || 'ativo';
+  res.json(buscarAssinaturas(status));
+}
+
+export function postSubscription(req, res) {
+  const dados = req.body || {};
+  const erros = validarAssinatura(dados);
+
+  if (erros.length > 0) {
+    return res.status(400).json({ error: erros[0] });
+  }
+
+  return res.status(201).json(criarAssinatura(dados));
+}
+
+export function putSubscription(req, res) {
+  const dados = req.body || {};
+  const erros = validarAssinatura(dados);
+
+  if (erros.length > 0) {
+    return res.status(400).json({ error: erros[0] });
+  }
+
+  const id = parseId(req.params.id);
+  const assinaturaAtualizada = id === null ? null : atualizarAssinatura(id, dados);
+
+  if (!assinaturaAtualizada) {
+    return res.status(404).json({ error: 'Assinatura não encontrada' });
+  }
+
+  return res.status(200).json(assinaturaAtualizada);
+}
