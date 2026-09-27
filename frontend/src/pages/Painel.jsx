@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
+import Button from '../components/Button.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
-import { listSubscriptions, createSubscription } from '../services/api.js';
+import { listSubscriptions, createSubscription, updateSubscription } from '../services/api.js';
 import './Painel.css';
 
 const formatoMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -10,6 +11,7 @@ export default function Painel() {
   const [assinaturas, setAssinaturas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erroLista, setErroLista] = useState(null);
+  const [assinaturaEmEdicao, setAssinaturaEmEdicao] = useState(null);
 
   const carregarAssinaturas = useCallback(() => {
     setCarregando(true);
@@ -29,14 +31,33 @@ export default function Painel() {
     carregarAssinaturas();
   }
 
+  async function handleSalvar(dados) {
+    if (!assinaturaEmEdicao) {
+      return handleCriar(dados);
+    }
+
+    const atualizada = await updateSubscription(assinaturaEmEdicao.id, dados);
+    setAssinaturas((atuais) =>
+      atuais
+        .map((assinatura) => (assinatura.id === atualizada.id ? atualizada : assinatura))
+        .sort((a, b) => a.data_cobranca.localeCompare(b.data_cobranca)),
+    );
+    setAssinaturaEmEdicao(null);
+  }
+
   return (
     <div className="sf-painel">
       <Nav tone="on-light" showCta={false} />
 
       <main className="sf-painel__content">
         <section className="sf-painel__card">
-          <h1>Nova assinatura</h1>
-          <SubscriptionForm onSubmit={handleCriar} />
+          <h1>{assinaturaEmEdicao ? 'Editar assinatura' : 'Nova assinatura'}</h1>
+          <SubscriptionForm
+            onSubmit={handleSalvar}
+            initialValues={assinaturaEmEdicao}
+            submitLabel={assinaturaEmEdicao ? 'Salvar alterações' : 'Cadastrar assinatura'}
+            onCancel={assinaturaEmEdicao ? () => setAssinaturaEmEdicao(null) : undefined}
+          />
         </section>
 
         <section className="sf-painel__card">
@@ -51,8 +72,18 @@ export default function Painel() {
           <ul className="sf-painel__lista">
             {assinaturas.map((assinatura) => (
               <li key={assinatura.id} className="sf-painel__item">
-                <span className="sf-painel__item-nome">{assinatura.nome}</span>
-                <span className="sf-painel__item-valor">{formatoMoeda.format(assinatura.valor)}</span>
+                <div className="sf-painel__item-dados">
+                  <span className="sf-painel__item-nome">{assinatura.nome}</span>
+                  <span className="sf-painel__item-valor">{formatoMoeda.format(assinatura.valor)}</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAssinaturaEmEdicao(assinatura)}
+                  aria-label={`Editar ${assinatura.nome}`}
+                >
+                  Editar
+                </Button>
               </li>
             ))}
           </ul>
