@@ -11,6 +11,7 @@ model Subscription {
   nome          String
   valor         Decimal
   data_cobranca DateTime
+  data_inicio   DateTime?
   categoria     String
   status        String   @default("ativo")
   criado_em     DateTime @default(now())
