@@ -39,13 +39,13 @@ export default function Painel() {
     carregarAssinaturas();
   }, [carregarAssinaturas]);
 
-  const atualizarListaEResumo = useCallback(() => {
-    return Promise.all([carregarAssinaturas(), recarregarResumo()]);
-  }, [carregarAssinaturas, recarregarResumo]);
+  const atualizarListaResumoEHistorico = useCallback(() => {
+    return Promise.all([carregarAssinaturas(), recarregarResumo(), recarregarHistorico()]);
+  }, [carregarAssinaturas, recarregarResumo, recarregarHistorico]);
 
   async function handleCriar(dados) {
     await createSubscription(dados);
-    await atualizarListaEResumo();
+    await atualizarListaResumoEHistorico();
   }
 
   async function handleSalvarEdicao(dados) {
@@ -55,17 +55,13 @@ export default function Painel() {
 
     await updateSubscription(assinaturaEditando.id, dados);
     setAssinaturaEditando(null);
-    await atualizarListaEResumo();
+    await atualizarListaResumoEHistorico();
   }
 
   async function handleRemover(id) {
     try {
       await deleteSubscription(id);
-
-      await Promise.all([
-        carregarAssinaturas(),
-        recarregarResumo(),
-      ]);
+      await atualizarListaResumoEHistorico();
     } catch (err) {
       setErroLista(err.message);
     }
