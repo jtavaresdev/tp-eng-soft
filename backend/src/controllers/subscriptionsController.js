@@ -4,7 +4,8 @@ import {
   cancelarAssinatura,
   criarAssinatura,
   validarAssinatura,
-  calcularResumoMensal
+  calcularResumoMensal,
+  buscarProximasCobrancas,
 } from '../services/subscriptionsService.js';
 
 function parseId(rawId) {
@@ -65,6 +66,18 @@ export async function getSummary(req, res) {
     console.error('[subscriptions/summary] Erro ao calcular resumo:', error);
     return res.status(500).json({
       error: 'Não foi possível calcular o resumo das assinaturas.',
+    });
+  }
+}
+
+export async function getUpcomingCharges(req, res) {
+  try {
+    const proximasCobrancas = await buscarProximasCobrancas();
+    return res.status(200).json(proximasCobrancas);
+  } catch (error) {
+    console.error('[subscriptions/upcoming-charges] Erro ao calcular próximas cobranças:', error);
+    return res.status(500).json({
+      error: 'Não foi possível calcular as próximas cobranças.',
     });
   }
 }
