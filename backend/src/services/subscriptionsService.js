@@ -1,7 +1,18 @@
 import { 
   getResumoAssinaturasAtivas,
   getAssinaturasParaHistorico,
+  getAssinaturasAtivasParaAlerta,
  } from '../repositories/subscriptionRepository.js';
+
+import {
+  hojeUTC,
+  calcularProximaCobranca,
+  diferencaEmDias,
+  formatarDataISO,
+} from '../util/dateUtils.js';
+
+const DIAS_ALERTA_PADRAO = 3;
+
 import db from '../db/index.js';
 
 export const CATEGORIAS_VALIDAS = [
@@ -167,4 +178,37 @@ export async function calcularHistoricoMensal(referencia = new Date()) {
       total: Number(somaDoMes.toFixed(2)),
     };
   });
+}
+
+function lerDiasAlertaConfigurados() {
+  const bruto = process.env.NOTIFY_DAYS_BEFORE;
+  const valor = Number(bruto);
+ 
+  if (bruto === undefined || bruto === '' || Number.isNaN(valor) || valor < 0) {
+    return DIAS_ALERTA_PADRAO;
+  }
+ 
+  return valor;
+}
+ 
+export async function buscarProximasCobrancas({
+  diasAlerta = lerDiasAlertaConfigurados(),
+  referencia = hojeUTC(),
+} = {}) {
+  const assinaturas = await getAssinaturasAtivasParaAlerta();
+ 
+  return assinaturas
+    .map((assinatura) => {
+      const proximaCobranca = calcularProximaCobranca(assinatura.data_cobranca, referencia);
+      const diasRestantes = diferencaEmDias(proximaCobranca, referencia);
+ 
+      return {
+        id: assinatura.id,
+        nome: assinatura.nome,
+        valor: Number(assinatura.valor.toFixed(2)),
+        proximaCobranca: formatarDataISO(proximaCobranca),
+        diasRestantes,
+      };
+    })
+    .filter((assinatura) => assinatura.diasRestantes === diasAlerta);
 }
