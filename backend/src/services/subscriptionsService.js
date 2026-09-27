@@ -1,4 +1,9 @@
-import { getResumoAssinaturasAtivas } from '../repositories/subscriptionRepository.js';
+import { Decimal } from 'decimal.js';
+
+import { 
+  getResumoAssinaturasAtivas,
+  getAssinaturasParaHistorico,
+ } from '../repositories/subscriptionRepository.js';
 import db from '../db/index.js';
 
 export const CATEGORIAS_VALIDAS = [
@@ -107,4 +112,58 @@ export async function calcularResumoMensal() {
     totalMensal,
     quantidadeAtivas: quantidade,
   };
+}
+
+function paraIndiceDeMes(data) {
+  const d = data instanceof Date ? data : new Date(data);
+  return d.getFullYear() * 12 + d.getMonth();
+}
+ 
+function gerarUltimos12Meses(referencia) {
+  const meses = [];
+ 
+  for (let deslocamento = 11; deslocamento >= 0; deslocamento--) {
+    const data = new Date(referencia.getFullYear(), referencia.getMonth() - deslocamento, 1);
+    const ano = data.getFullYear();
+    const mes = data.getMonth(); // 0-based
+ 
+    meses.push({
+      indice: ano * 12 + mes,
+      chave: `${ano}-${String(mes + 1).padStart(2, '0')}`, // "YYYY-MM"
+    });
+  }
+ 
+  return meses;
+}
+ 
+function estavaAtivaNoMes(assinatura, indiceDoMes) {
+  const indiceInicio = paraIndiceDeMes(assinatura.criado_em);
+  const indiceFim = assinatura.cancelado_em ? paraIndiceDeMes(assinatura.cancelado_em) : null;
+ 
+  const jaFoiCriada = indiceInicio <= indiceDoMes;
+  const aindaNaoFoiCancelada = indiceFim === null || indiceDoMes <= indiceFim;
+ 
+  return jaFoiCriada && aindaNaoFoiCancelada;
+}
+ 
+export async function calcularHistoricoMensal(referencia = new Date()) {
+  const assinaturas = await getAssinaturasParaHistorico();
+  const meses = gerarUltimos12Meses(referencia);
+ 
+  return meses.map(({ indice, chave }) => {
+    const somaDoMes = assinaturas.reduce((acumulado, assinatura) => {
+      if (!estavaAtivaNoMes(assinatura, indice)) return acumulado;
+      
+      const valor = typeof assinatura.valor?.toNumber === 'function' 
+        ? assinatura.valor.toNumber() 
+        : Number(assinatura.valor) || 0;
+    
+      return acumulado + valor;
+    }, 0);
+ 
+    return {
+      mes: chave,
+      total: Number(somaDoMes.toFixed(2)),
+    };
+  });
 }
