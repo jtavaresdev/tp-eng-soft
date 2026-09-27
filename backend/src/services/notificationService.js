@@ -94,3 +94,83 @@ export async function enviarLembrete(
     text: montarMensagem(assinatura),
   });
 }
+
+function montarResultado(assinatura) {
+  return {
+    subscriptionId: assinatura.id,
+    nome: assinatura.nome,
+    cicloCobranca: assinatura.proximaCobranca,
+    proximaCobranca: assinatura.proximaCobranca,
+  };
+}
+
+export async function executarJobNotificacoes({
+  diasAlerta = obterDiasAlerta(),
+  referencia = hojeUTC(),
+  transporter,
+  destinatario = process.env.NOTIFY_EMAIL_TO,
+} = {}) {
+  const assinaturas = await buscarProximasCobrancas({ diasAlerta, referencia });
+  const resumo = {
+    executadoEm: new Date().toISOString(),
+    diasAlerta,
+    encontradas: assinaturas.length,
+    enviadas: 0,
+    ignoradas: 0,
+    falhas: 0,
+    resultados: [],
+  };
+
+  if (assinaturas.length === 0) {
+    return resumo;
+  }
+
+  let transport = transporter;
+  if (!transport) {
+    try {
+      transport = criarTransporter();
+    } catch (error) {
+      resumo.falhas = assinaturas.length;
+      resumo.resultados = assinaturas.map((assinatura) => ({
+        ...montarResultado(assinatura),
+        status: 'failed',
+        erro: error.message,
+      }));
+      return resumo;
+    }
+  }
+
+  for (const assinatura of assinaturas) {
+    const resultado = montarResultado(assinatura);
+    const claim = claimNotification(assinatura.id, assinatura.proximaCobranca);
+
+    if (!claim.claimed) {
+      resumo.ignoradas += 1;
+      resumo.resultados.push({
+        ...resultado,
+        status: 'skipped',
+        motivo: claim.delivery?.status || 'already-processed',
+      });
+      continue;
+    }
+
+    try {
+      await enviarLembrete(assinatura, { transporter: transport, destinatario });
+      markNotificationSent(assinatura.id, assinatura.proximaCobranca);
+      resumo.enviadas += 1;
+      resumo.resultados.push({ ...resultado, status: 'sent' });
+    } catch (error) {
+      markNotificationFailed(assinatura.id, assinatura.proximaCobranca, error);
+      resumo.falhas += 1;
+      resumo.resultados.push({
+        ...resultado,
+        status: 'failed',
+        erro: error.message,
+      });
+    }
+  }
+
+  return resumo;
+}
+
+export const runNotificationJob = executarJobNotificacoes;
