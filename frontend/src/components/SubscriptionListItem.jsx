@@ -39,6 +39,7 @@ export default function SubscriptionListItem({ assinatura, formatoMoeda, onRemov
       {onEditar && (
         <Button
           type="button"
+          className="sf-remove-btn"
           variant="outline"
           onClick={() => onEditar(assinatura)}
           aria-label={`Editar ${assinatura.nome}`}
