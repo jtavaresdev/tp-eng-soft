@@ -24,3 +24,8 @@
   background: #ffe6de;
   color: var(--sf-alert);
 }
+
+.sf-badge--categoria {
+  background: var(--sf-mist);
+  color: var(--sf-ink);
+}
