@@ -9,6 +9,8 @@ node_modules/
 # Banco SQLite local
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 
 
 

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
 import Button from '../components/Button.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
-import { listSubscriptions, createSubscription, updateSubscription } from '../services/api.js';
+import { listSubscriptions, createSubscription, updateSubscription, deleteSubscription } from '../services/api.js';
+import SubscriptionListItem from '../components/SubscriptionListItem.jsx';
 import './Painel.css';
 
 const formatoMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -43,6 +44,13 @@ export default function Painel() {
         .sort((a, b) => a.data_cobranca.localeCompare(b.data_cobranca)),
     );
     setAssinaturaEmEdicao(null);
+  async function handleRemover(id) {
+    try {
+      await deleteSubscription(id);
+      await carregarAssinaturas();
+    } catch (err) {
+      setErroLista(err.message);
+    }
   }
 
   return (
@@ -71,20 +79,14 @@ export default function Painel() {
 
           <ul className="sf-painel__lista">
             {assinaturas.map((assinatura) => (
-              <li key={assinatura.id} className="sf-painel__item">
-                <div className="sf-painel__item-dados">
-                  <span className="sf-painel__item-nome">{assinatura.nome}</span>
-                  <span className="sf-painel__item-valor">{formatoMoeda.format(assinatura.valor)}</span>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setAssinaturaEmEdicao(assinatura)}
-                  aria-label={`Editar ${assinatura.nome}`}
-                >
-                  Editar
-                </Button>
-              </li>
+              <SubscriptionListItem
+                key={assinatura.id}
+                assinatura={assinatura}
+                formatoMoeda={formatoMoeda}
+                onRemover={handleRemover}
+                onEditar={() => setAssinaturaEmEdicao(assinatura)}
+
+              />
             ))}
           </ul>
         </section>

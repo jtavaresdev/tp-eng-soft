@@ -1,0 +1,29 @@
+.sf-remove-btn {
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-size-label);
+  font-weight: 600;
+  padding: var(--sf-space-1) var(--sf-space-3);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-paper);
+  color: var(--sf-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.sf-remove-btn:hover:not(:disabled) {
+  border-color: var(--sf-alert);
+  color: var(--sf-alert);
+}
+
+.sf-remove-btn--confirmando {
+  background: var(--sf-alert);
+  border-color: var(--sf-alert);
+  color: var(--sf-paper);
+}
+
+.sf-remove-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

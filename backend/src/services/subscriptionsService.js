@@ -1,3 +1,18 @@
+import { 
+  getResumoAssinaturasAtivas,
+  getAssinaturasParaHistorico,
+  getAssinaturasAtivasParaAlerta,
+ } from '../repositories/subscriptionRepository.js';
+
+import {
+  hojeUTC,
+  calcularProximaCobranca,
+  diferencaEmDias,
+  formatarDataISO,
+} from '../util/dateUtils.js';
+
+const DIAS_ALERTA_PADRAO = 3;
+
 import db from '../db/index.js';
 
 export const CATEGORIAS_VALIDAS = [
@@ -94,4 +109,106 @@ export function cancelarAssinatura(id) {
   `).run(id);
 
   return buscarAssinaturaPorId(id);
+}
+
+
+export async function calcularResumoMensal() {
+  const { somaValor, quantidade } = await getResumoAssinaturasAtivas();
+ 
+  const totalMensal = somaValor ? Number(somaValor.toFixed(2)) : 0;
+ 
+  return {
+    totalMensal,
+    quantidadeAtivas: quantidade,
+  };
+}
+
+function paraIndiceDeMes(data) {
+  const d = data instanceof Date ? data : new Date(data);
+  return d.getUTCFullYear() * 12 + d.getUTCMonth();
+}
+
+function gerarUltimos12Meses(referencia) {
+  const meses = [];
+  
+  const anoRef = referencia.getFullYear();
+  const mesRef = referencia.getMonth();
+
+  for (let deslocamento = 11; deslocamento >= 0; deslocamento--) {
+    const data = new Date(anoRef, mesRef - deslocamento, 1);
+    const ano = data.getFullYear();
+    const mes = data.getMonth(); // 0-based
+
+    meses.push({
+      indice: ano * 12 + mes,
+      chave: `${ano}-${String(mes + 1).padStart(2, '0')}`, // "YYYY-MM"
+    });
+  }
+
+  return meses;
+}
+
+function estavaAtivaNoMes(assinatura, indiceDoMes) {
+  const indiceInicio = paraIndiceDeMes(assinatura.criado_em);
+  const indiceFim = assinatura.cancelado_em ? paraIndiceDeMes(assinatura.cancelado_em) : null;
+
+  const jaFoiCriada = indiceInicio <= indiceDoMes;
+  const aindaNaoFoiCancelada = indiceFim === null || indiceDoMes <= indiceFim;
+
+  return jaFoiCriada && aindaNaoFoiCancelada;
+}
+
+export async function calcularHistoricoMensal(referencia = new Date()) {
+  const assinaturas = await getAssinaturasParaHistorico();
+  const meses = gerarUltimos12Meses(referencia);
+
+  return meses.map(({ indice, chave }) => {
+    const somaDoMes = assinaturas.reduce((acumulado, assinatura) => {
+      if (!estavaAtivaNoMes(assinatura, indice)) return acumulado;
+      
+      const valor = typeof assinatura.valor?.toNumber === 'function' 
+        ? assinatura.valor.toNumber() 
+        : Number(assinatura.valor) || 0;
+    
+      return acumulado + valor;
+    }, 0);
+
+    return {
+      mes: chave,
+      total: Number(somaDoMes.toFixed(2)),
+    };
+  });
+}
+
+function lerDiasAlertaConfigurados() {
+  const bruto = process.env.NOTIFY_DAYS_BEFORE;
+  const valor = Number(bruto);
+ 
+  if (bruto === undefined || bruto === '' || Number.isNaN(valor) || valor < 0) {
+    return DIAS_ALERTA_PADRAO;
+  }
+ 
+  return valor;
+}
+ 
+export async function buscarProximasCobrancas({
+  diasAlerta = lerDiasAlertaConfigurados(),
+  referencia = hojeUTC(),
+} = {}) {
+  const assinaturas = await getAssinaturasAtivasParaAlerta();
+ 
+  return assinaturas
+    .map((assinatura) => {
+      const proximaCobranca = calcularProximaCobranca(assinatura.data_cobranca, referencia);
+      const diasRestantes = diferencaEmDias(proximaCobranca, referencia);
+ 
+      return {
+        id: assinatura.id,
+        nome: assinatura.nome,
+        valor: Number(assinatura.valor.toFixed(2)),
+        proximaCobranca: formatarDataISO(proximaCobranca),
+        diasRestantes,
+      };
+    })
+    .filter((assinatura) => assinatura.diasRestantes === diasAlerta);
 }

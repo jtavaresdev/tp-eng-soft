@@ -34,5 +34,8 @@ export function updateSubscription(id, dados) {
   return request(`/subscriptions/${id}`, {
     method: 'PUT',
     body: JSON.stringify(dados),
+export function deleteSubscription(id) {
+  return request(`/subscriptions/${id}`, {
+    method: 'DELETE',
   });
 }

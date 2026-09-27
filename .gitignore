@@ -19,6 +19,8 @@ node_modules/
 *.db
 *.db-journal
 
+
+
 # --- Builds e artefatos ---
 dist/
 build/

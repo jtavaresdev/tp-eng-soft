@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import healthRouter from './routes/health.js';
 import subscriptionsRouter from './routes/subscriptions.js';
+import statsRouter from './routes/stats.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use('/health', healthRouter);
 app.use('/subscriptions', subscriptionsRouter);
+app.use('/stats', statsRouter);
 
 // Colocar rotas aqui
 app.use('/subscriptions', subscriptionsRouter);

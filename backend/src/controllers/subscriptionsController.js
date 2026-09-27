@@ -4,7 +4,11 @@ import {
   cancelarAssinatura,
   criarAssinatura,
   validarAssinatura,
+  calcularResumoMensal,
+  buscarProximasCobrancas,
 } from '../services/subscriptionsService.js';
+
+import { hojeUTC, parseDataISOParaUTC } from '../util/dateUtils.js';
 
 function parseId(rawId) {
   const id = Number(rawId);
@@ -54,4 +58,43 @@ export function deleteSubscription(req, res) {
   }
 
   return res.status(200).json(assinaturaCancelada);
+}
+
+export async function getSummary(req, res) {
+  try {
+    const resumo = await calcularResumoMensal();
+    return res.status(200).json(resumo);
+  } catch (error) {
+    console.error('[subscriptions/summary] Erro ao calcular resumo:', error);
+    return res.status(500).json({
+      error: 'Não foi possível calcular o resumo das assinaturas.',
+    });
+  }
+}
+
+export async function getUpcomingCharges(req, res) {
+  try {
+    const { date } = req.query;
+    let referencia = hojeUTC();
+ 
+    if (date !== undefined) {
+      const dataParseada = parseDataISOParaUTC(date);
+ 
+      if (!dataParseada) {
+        return res.status(400).json({
+          error: 'Parâmetro "date" inválido. Use o formato YYYY-MM-DD (ex: 2026-02-25).',
+        });
+      }
+ 
+      referencia = dataParseada;
+    }
+ 
+    const proximasCobrancas = await buscarProximasCobrancas({ referencia });
+    return res.status(200).json(proximasCobrancas);
+  } catch (error) {
+    console.error('[subscriptions/upcoming-charges] Erro ao calcular próximas cobranças:', error);
+    return res.status(500).json({
+      error: 'Não foi possível calcular as próximas cobranças.',
+    });
+  }
 }
