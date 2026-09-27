@@ -14,3 +14,13 @@ export async function getResumoAssinaturasAtivas() {
     quantidade: resultado._count._all,
   };
 }
+
+export async function getAssinaturasParaHistorico() {
+  return prisma.subscription.findMany({
+    select: {
+      valor: true,
+      criado_em: true,
+      cancelado_em: true,
+    },
+  });
+}
