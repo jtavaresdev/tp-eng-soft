@@ -174,3 +174,39 @@ export async function executarJobNotificacoes({
 }
 
 export const runNotificationJob = executarJobNotificacoes;
+
+export function iniciarAgendamentoNotificacoes({
+  schedule = process.env.CRON_SCHEDULE || '0 8 * * *',
+  timezone = process.env.CRON_TIMEZONE || 'America/Sao_Paulo',
+} = {}) {
+  if (process.env.NOTIFICATION_SCHEDULER_ENABLED === 'false') {
+    return null;
+  }
+
+  if (tarefaAgendada) {
+    return tarefaAgendada;
+  }
+
+  if (!cron.validate(schedule)) {
+    throw new Error(`CRON_SCHEDULE inválido: ${schedule}`);
+  }
+
+  tarefaAgendada = cron.schedule(schedule, async () => {
+    try {
+      const resultado = await executarJobNotificacoes();
+      console.log('[notifications] job concluído:', resultado);
+    } catch (error) {
+      console.error('[notifications] erro no job:', error);
+    }
+  }, { scheduled: true, timezone });
+
+  console.log(`[notifications] job agendado para "${schedule}" (${timezone})`);
+  return tarefaAgendada;
+}
+
+export function pararAgendamentoNotificacoes() {
+  if (tarefaAgendada) {
+    tarefaAgendada.stop();
+    tarefaAgendada = null;
+  }
+}
