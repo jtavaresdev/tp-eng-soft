@@ -41,8 +41,8 @@ export default function MonthlyEvolutionChart({ dados = [], carregando, erro }) 
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={dados} margin={{ top: 12, right: 16, bottom: 4, left: 8 }}>
           <CartesianGrid stroke="var(--sf-line)" strokeDasharray="4 4" />
-          <XAxis dataKey="mes" tickFormatter={formatarMes} stroke="var(--sf-muted)" />
-          <YAxis tickFormatter={formatoMoeda.format} stroke="var(--sf-muted)" width={72} />
+          <XAxis dataKey="mes" label={{ value: 'Mês', position: 'insideBottom', offset: -2 }} tickFormatter={formatarMes} stroke="var(--sf-muted)" />
+          <YAxis label={{ value: 'R$', angle: -90, position: 'insideLeft', offset: 8 }} tickFormatter={formatoMoeda.format} stroke="var(--sf-muted)" width={72} />
           <Tooltip
             labelFormatter={formatarMes}
             formatter={(valor) => [formatoMoeda.format(valor), 'Total mensal']}
