@@ -166,12 +166,20 @@ function gerarUltimos12Meses(referencia) {
 
 function estavaAtivaNoMes(assinatura, indiceDoMes) {
   const indiceInicio = paraIndiceDeMes(assinatura.criado_em);
-  const indiceFim = assinatura.cancelado_em ? paraIndiceDeMes(assinatura.cancelado_em) : null;
 
-  const jaFoiCriada = indiceInicio <= indiceDoMes;
-  const aindaNaoFoiCancelada = indiceFim === null || indiceDoMes <= indiceFim;
+  if (indiceInicio > indiceDoMes) {
+    return false;
+  }
 
-  return jaFoiCriada && aindaNaoFoiCancelada;
+  if (assinatura.status === 'ativo') {
+    return true;
+  }
+
+  if (assinatura.status !== 'cancelado' || !assinatura.cancelado_em) {
+    return false;
+  }
+
+  return indiceDoMes < paraIndiceDeMes(assinatura.cancelado_em);
 }
 
 export async function calcularHistoricoMensal(referencia = new Date()) {

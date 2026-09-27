@@ -29,6 +29,7 @@ export async function getAssinaturasParaHistorico() {
       valor: true,
       criado_em: true,
       cancelado_em: true,
+      status: true,
     },
   });
 }
