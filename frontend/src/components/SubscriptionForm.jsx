@@ -10,7 +10,17 @@ const CATEGORIAS = [
   { value: 'outros', label: 'Outros' },
 ];
 
-const CAMPOS_VAZIOS = { nome: '', valor: '', data_cobranca: '', categoria: '' };
+const CAMPOS_VAZIOS = {
+  nome: '',
+  valor: '',
+  data_cobranca: '',
+  data_inicio: '',
+  categoria: '',
+};
+
+function formatarDataParaInput(data) {
+  return data ? String(data).slice(0, 10) : '';
+}
 
 function normalizarCampos(dados) {
   if (!dados) {
@@ -21,6 +31,7 @@ function normalizarCampos(dados) {
     nome: dados.nome ?? '',
     valor: dados.valor != null ? String(dados.valor) : '',
     data_cobranca: dados.data_cobranca ?? '',
+    data_inicio: formatarDataParaInput(dados.data_inicio ?? dados.criado_em),
     categoria: dados.categoria ?? '',
   };
 }
@@ -54,6 +65,7 @@ export default function SubscriptionForm({
         nome: campos.nome,
         valor: Number(campos.valor),
         data_cobranca: campos.data_cobranca,
+        data_inicio: campos.data_inicio,
         categoria: campos.categoria,
       });
       setCampos(CAMPOS_VAZIOS);
@@ -101,6 +113,18 @@ export default function SubscriptionForm({
           name="data_cobranca"
           type="date"
           value={campos.data_cobranca}
+          onChange={atualizarCampo}
+          required
+        />
+      </div>
+
+      <div className="sf-form__row">
+        <label htmlFor="data_inicio">Data de início</label>
+        <input
+          id="data_inicio"
+          name="data_inicio"
+          type="date"
+          value={campos.data_inicio}
           onChange={atualizarCampo}
           required
         />
