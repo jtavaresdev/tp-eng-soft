@@ -1,7 +1,7 @@
 .sf-resumo {
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--sf-space-4);
+    flex-direction: column;
+    gap: var(--sf-space-3);
     margin-bottom: var(--sf-space-8);
   }
   

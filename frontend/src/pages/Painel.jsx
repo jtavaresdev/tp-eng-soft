@@ -42,7 +42,7 @@ export default function Painel() {
   async function handleRemover(id) {
     try {
       await deleteSubscription(id);
-      await carregarAssinaturas();
+      await atualizarListaEResumo();
     } catch (err) {
       setErroLista(err.message);
     }
