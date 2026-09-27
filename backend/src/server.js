@@ -4,6 +4,8 @@ import cors from 'cors';
 import healthRouter from './routes/health.js';
 import subscriptionsRouter from './routes/subscriptions.js';
 import statsRouter from './routes/stats.js';
+import notificationsRouter from './routes/notifications.js';
+import { iniciarAgendamentoNotificacoes } from './services/notificationService.js';
 
 const app = express();
 
@@ -16,6 +18,7 @@ app.use(express.json());
 app.use('/health', healthRouter);
 app.use('/subscriptions', subscriptionsRouter);
 app.use('/stats', statsRouter);
+app.use('/notifications', notificationsRouter);
 
 // Colocar rotas aqui
 app.use('/subscriptions', subscriptionsRouter);
@@ -31,6 +34,8 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Erro interno do servidor' });
 });
+
+iniciarAgendamentoNotificacoes();
 
 app.listen(PORT, () => {
   console.log(`API rodando em http://localhost:${PORT}`);
