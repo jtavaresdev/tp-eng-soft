@@ -7,7 +7,7 @@ import {
   calcularResumoMensal,
   buscarProximasCobrancas,
 } from '../services/subscriptionsService.js';
-
+import { enviarLembrete } from '../services/mail/emailService.js';
 import { hojeUTC, parseDataISOParaUTC } from '../util/dateUtils.js';
 
 function parseId(rawId) {
@@ -95,6 +95,42 @@ export async function getUpcomingCharges(req, res) {
     console.error('[subscriptions/upcoming-charges] Erro ao calcular próximas cobranças:', error);
     return res.status(500).json({
       error: 'Não foi possível calcular as próximas cobranças.',
+    });
+  }
+}
+
+export async function dispararNotificacoes(req, res) {
+  try {
+    const referencia = hojeUTC();
+    const proximasCobrancas = await buscarProximasCobrancas({ referencia });
+    const resultados = [];
+
+    for (const cobranca of proximasCobrancas) {
+      const resultado = await enviarLembrete({
+        nome: cobranca.nome,
+        valor: cobranca.valor,
+        dataCobranca: cobranca.proximaCobranca,
+      });
+
+      resultados.push({
+        id: cobranca.id,
+        nome: cobranca.nome,
+        diasRestantes: cobranca.diasRestantes,
+        ...resultado,
+      });
+    }
+
+    return res.status(200).json({
+      sucesso: true,
+      quantidade: proximasCobrancas.length,
+      resultados,
+    });
+  } catch (err) {
+    console.error('Erro ao disparar notificações:', err);
+
+    return res.status(500).json({
+      sucesso: false,
+      erro: 'Não foi possível disparar as notificações.',
     });
   }
 }
