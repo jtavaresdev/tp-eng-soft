@@ -1,5 +1,6 @@
 import { 
   getResumoAssinaturasAtivas,
+  getTotaisPorCategoriaAtivas,
   getAssinaturasParaHistorico,
   getAssinaturasAtivasParaAlerta,
  } from '../repositories/subscriptionRepository.js';
@@ -123,6 +124,21 @@ export async function calcularResumoMensal() {
   };
 }
 
+export async function calcularGastosPorCategoria() {
+  const totais = await getTotaisPorCategoriaAtivas();
+  const totaisPorCategoria = new Map(
+    totais.map(({ categoria, _sum }) => [
+      categoria,
+      _sum.valor ? Number(_sum.valor.toFixed(2)) : 0,
+    ]),
+  );
+
+  return CATEGORIAS_VALIDAS.map((categoria) => ({
+    categoria,
+    total: totaisPorCategoria.get(categoria) ?? 0,
+  }));
+}
+
 function paraIndiceDeMes(data) {
   const d = data instanceof Date ? data : new Date(data);
   return d.getUTCFullYear() * 12 + d.getUTCMonth();
@@ -210,5 +226,5 @@ export async function buscarProximasCobrancas({
         diasRestantes,
       };
     })
-    .filter((assinatura) => assinatura.diasRestantes === diasAlerta);
+    .filter((assinatura) => assinatura.diasRestantes <= diasAlerta);
 }

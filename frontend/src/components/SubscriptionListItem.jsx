@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Badge from './Badge.jsx';
 import './SubscriptionListItem.css';
 
 const TEMPO_CONFIRMACAO = 3000; //
@@ -34,6 +35,7 @@ export default function SubscriptionListItem({ assinatura, formatoMoeda, onRemov
   return (
     <li className="sf-painel__item">
       <span className="sf-painel__item-nome">{assinatura.nome}</span>
+      <Badge tone="categoria">{assinatura.categoria}</Badge>
       <span className="sf-painel__item-valor">{formatoMoeda.format(assinatura.valor)}</span>
       <div className="sf-painel__item-actions">
         <button type="button" className="sf-edit-btn" onClick={() => onEditar?.(assinatura)}>
