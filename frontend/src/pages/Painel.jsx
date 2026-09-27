@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
+import MonthlyEvolutionChart from '../components/MonthlyEvolutionChart.jsx';
 import SummarySubscription from '../components/SummarySubscription.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
 import SubscriptionListItem from '../components/SubscriptionListItem.jsx';
+import { useMonthlyEvolution } from '../hooks/useMonthlyEvolution.js';
 import { useSubscriptionSummary } from '../hooks/useSummary.js';
 import { listSubscriptions, createSubscription, updateSubscription, deleteSubscription } from '../services/api.js';
 import './Painel.css';
@@ -17,6 +19,12 @@ export default function Painel() {
 
   const { resumo, carregando: carregandoResumo, erro: erroResumo, recarregarResumo } =
   useSubscriptionSummary();
+  const {
+    historico,
+    carregando: carregandoHistorico,
+    erro: erroHistorico,
+    recarregarHistorico,
+  } = useMonthlyEvolution();
 
   const carregarAssinaturas = useCallback(() => {
     setCarregando(true);
@@ -106,6 +114,15 @@ export default function Painel() {
               />
             ))}
           </ul>
+        </section>
+
+        <section className="sf-painel__card">
+          <h2>Evolução mensal</h2>
+          <MonthlyEvolutionChart
+            dados={historico}
+            carregando={carregandoHistorico}
+            erro={erroHistorico}
+          />
         </section>
       </main>
     </div>
