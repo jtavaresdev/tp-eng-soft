@@ -35,14 +35,18 @@ export default function Painel() {
   }, [carregarAssinaturas, recarregarResumo]);
 
   async function handleCriar(dados) {
-    await createSubscription(dados);
-    carregarAssinaturas();
-  }
+  await createSubscription(dados);
+  await atualizarListaEResumo();
+}
 
   async function handleRemover(id) {
     try {
       await deleteSubscription(id);
-      await atualizarListaEResumo();
+  
+      await Promise.all([
+        carregarAssinaturas(),
+        recarregarResumo(),
+      ]);
     } catch (err) {
       setErroLista(err.message);
     }
