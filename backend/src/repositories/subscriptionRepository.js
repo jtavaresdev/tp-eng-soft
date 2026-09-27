@@ -24,3 +24,15 @@ export async function getAssinaturasParaHistorico() {
     },
   });
 }
+
+export async function getAssinaturasAtivasParaAlerta() {
+  return prisma.subscription.findMany({
+    where: { status: STATUS_ATIVO },
+    select: {
+      id: true,
+      nome: true,
+      valor: true,
+      data_cobranca: true,
+    },
+  });
+}
