@@ -1,0 +1,16 @@
+.sf-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sf-space-4);
+    margin-bottom: var(--sf-space-8);
+  }
+  
+  .sf-resumo--erro {
+    font-family: var(--sf-font-body);
+    font-size: var(--sf-size-small);
+    color: var(--sf-alert);
+    border: 1px solid var(--sf-alert);
+    border-radius: var(--sf-radius-md);
+    padding: var(--sf-space-3) var(--sf-space-4);
+    background: var(--sf-mist);
+  }
