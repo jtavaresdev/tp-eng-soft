@@ -112,7 +112,7 @@ export default function Painel() {
           </ul>
         </section>
 
-        <section className="sf-painel__card">
+        <section className="sf-painel__card sf-painel__card--grafico">
           <h2>Evolução mensal</h2>
           <MonthlyEvolutionChart
             dados={historico}

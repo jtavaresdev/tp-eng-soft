@@ -28,6 +28,10 @@
   padding: var(--sf-space-6);
 }
 
+.sf-painel__card--grafico {
+  grid-column: 1 / -1;
+}
+
 .sf-painel h1,
 .sf-painel h2 {
   font-family: var(--sf-font-display);
