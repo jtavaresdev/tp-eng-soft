@@ -169,7 +169,7 @@ function gerarUltimos12Meses(referencia) {
 }
 
 function estavaAtivaNoMes(assinatura, indiceDoMes) {
-  const indiceInicio = paraIndiceDeMes(assinatura.criado_em);
+  const indiceInicio = paraIndiceDeMes(assinatura.data_inicio ?? assinatura.criado_em);
 
   if (indiceInicio > indiceDoMes) {
     return false;
