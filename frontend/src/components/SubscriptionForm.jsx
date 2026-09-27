@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from './Button.jsx';
 import './SubscriptionForm.css';
 
@@ -12,10 +12,33 @@ const CATEGORIAS = [
 
 const CAMPOS_VAZIOS = { nome: '', valor: '', data_cobranca: '', categoria: '' };
 
-export default function SubscriptionForm({ onSubmit }) {
-  const [campos, setCampos] = useState(CAMPOS_VAZIOS);
+function valoresIniciais(assinatura) {
+  if (!assinatura) {
+    return CAMPOS_VAZIOS;
+  }
+
+  return {
+    nome: assinatura.nome ?? '',
+    valor: assinatura.valor?.toString() ?? '',
+    data_cobranca: assinatura.data_cobranca?.slice(0, 10) ?? '',
+    categoria: assinatura.categoria ?? '',
+  };
+}
+
+export default function SubscriptionForm({
+  onSubmit,
+  initialValues = null,
+  submitLabel = 'Cadastrar assinatura',
+  onCancel,
+}) {
+  const [campos, setCampos] = useState(() => valoresIniciais(initialValues));
   const [erro, setErro] = useState(null);
   const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    setCampos(valoresIniciais(initialValues));
+    setErro(null);
+  }, [initialValues]);
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target;
@@ -105,8 +128,14 @@ export default function SubscriptionForm({ onSubmit }) {
       )}
 
       <Button type="submit" variant="solid" disabled={enviando}>
-        {enviando ? 'Salvando…' : 'Cadastrar assinatura'}
+        {enviando ? 'Salvando…' : submitLabel}
       </Button>
+
+      {onCancel && (
+        <Button type="button" variant="outline" onClick={onCancel} disabled={enviando}>
+          Cancelar edição
+        </Button>
+      )}
     </form>
   );
 }

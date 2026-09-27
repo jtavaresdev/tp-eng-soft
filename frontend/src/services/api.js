@@ -29,3 +29,10 @@ export function createSubscription(dados) {
     body: JSON.stringify(dados),
   });
 }
+
+export function updateSubscription(id, dados) {
+  return request(`/subscriptions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(dados),
+  });
+}
