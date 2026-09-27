@@ -49,3 +49,26 @@ export function formatarDataISO(data) {
   const dia = String(data.getUTCDate()).padStart(2, '0');
   return `${ano}-${mes}-${dia}`;
 }
+
+const REGEX_DATA_ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
+ 
+export function parseDataISOParaUTC(texto) {
+  if (typeof texto !== 'string') return null;
+ 
+  const match = REGEX_DATA_ISO.exec(texto);
+  if (!match) return null;
+ 
+  const [, anoStr, mesStr, diaStr] = match;
+  const ano = Number(anoStr);
+  const mes = Number(mesStr); // 1-based, como digitado
+  const dia = Number(diaStr);
+ 
+  const data = new Date(Date.UTC(ano, mes - 1, dia));
+ 
+  const dataValida =
+    data.getUTCFullYear() === ano &&
+    data.getUTCMonth() === mes - 1 &&
+    data.getUTCDate() === dia;
+ 
+  return dataValida ? data : null;
+}
