@@ -34,6 +34,21 @@ db.exec(`
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
     cancelado_em TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS notification_deliveries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subscription_id INTEGER NOT NULL,
+    ciclo_cobranca TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'processing',
+    tentativa_em TEXT NOT NULL DEFAULT (datetime('now')),
+    enviado_em TEXT,
+    erro TEXT,
+    UNIQUE (subscription_id, ciclo_cobranca),
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions (id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_notification_deliveries_subscription
+    ON notification_deliveries (subscription_id);
 `);
 
 export default db;

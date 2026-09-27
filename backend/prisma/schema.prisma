@@ -16,5 +16,22 @@ model Subscription {
   criado_em     DateTime @default(now())
   cancelado_em  DateTime?
 
+  avisos NotificationDelivery[]
+
   @@map("subscriptions")
+}
+
+model NotificationDelivery {
+  id              Int          @id @default(autoincrement())
+  subscription_id Int
+  ciclo_cobranca  String
+  status          String       @default("processing")
+  tentativa_em    DateTime     @default(now())
+  enviado_em      DateTime?
+  erro            String?
+  subscription    Subscription @relation(fields: [subscription_id], references: [id])
+
+  @@unique([subscription_id, ciclo_cobranca])
+  @@index([subscription_id])
+  @@map("notification_deliveries")
 }
