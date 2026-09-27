@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from './Button.jsx';
 import './SubscriptionForm.css';
 
@@ -12,10 +12,32 @@ const CATEGORIAS = [
 
 const CAMPOS_VAZIOS = { nome: '', valor: '', data_cobranca: '', categoria: '' };
 
-export default function SubscriptionForm({ onSubmit }) {
-  const [campos, setCampos] = useState(CAMPOS_VAZIOS);
+function normalizarCampos(dados) {
+  if (!dados) {
+    return CAMPOS_VAZIOS;
+  }
+
+  return {
+    nome: dados.nome ?? '',
+    valor: dados.valor != null ? String(dados.valor) : '',
+    data_cobranca: dados.data_cobranca ?? '',
+    categoria: dados.categoria ?? '',
+  };
+}
+
+export default function SubscriptionForm({
+  onSubmit,
+  initialValues = null,
+  submitLabel = 'Cadastrar assinatura',
+  onCancel = null,
+}) {
+  const [campos, setCampos] = useState(() => normalizarCampos(initialValues));
   const [erro, setErro] = useState(null);
   const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    setCampos(normalizarCampos(initialValues));
+  }, [initialValues]);
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target;
@@ -104,9 +126,17 @@ export default function SubscriptionForm({ onSubmit }) {
         </p>
       )}
 
-      <Button type="submit" variant="solid" disabled={enviando}>
-        {enviando ? 'Salvando…' : 'Cadastrar assinatura'}
-      </Button>
+      <div className="sf-form__actions">
+        <Button type="submit" variant="solid" disabled={enviando}>
+          {enviando ? 'Salvando…' : submitLabel}
+        </Button>
+
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+        )}
+      </div>
     </form>
   );
 }

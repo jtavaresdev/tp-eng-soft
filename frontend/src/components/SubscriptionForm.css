@@ -5,6 +5,12 @@
   max-width: 22rem;
 }
 
+.sf-form__actions {
+  display: flex;
+  gap: var(--sf-space-2);
+  flex-wrap: wrap;
+}
+
 .sf-form__row {
   display: flex;
   flex-direction: column;

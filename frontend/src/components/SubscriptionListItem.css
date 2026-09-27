@@ -1,3 +1,11 @@
+.sf-painel__item-actions {
+  display: flex;
+  gap: var(--sf-space-2);
+  align-items: center;
+  margin-left: auto;
+}
+
+.sf-edit-btn,
 .sf-remove-btn {
   font-family: var(--sf-font-body);
   font-size: var(--sf-size-label);
@@ -10,6 +18,15 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.sf-edit-btn {
+  border-color: var(--sf-blue);
+  color: var(--sf-blue);
+}
+
+.sf-edit-btn:hover {
+  background: rgba(36, 112, 240, 0.08);
 }
 
 .sf-remove-btn:hover:not(:disabled) {
