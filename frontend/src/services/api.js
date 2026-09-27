@@ -38,7 +38,7 @@ export function deleteSubscription(id) {
 
 export async function getSubscriptionSummary() {
   return request(
-    "subscriptions/summary",
+    "/subscriptions/summary",
     {
       method: 'GET',
     },
