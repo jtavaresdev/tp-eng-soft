@@ -1,5 +1,6 @@
 import { 
   getResumoAssinaturasAtivas,
+  getTotaisPorCategoriaAtivas,
   getAssinaturasParaHistorico,
   getAssinaturasAtivasParaAlerta,
  } from '../repositories/subscriptionRepository.js';
@@ -121,6 +122,21 @@ export async function calcularResumoMensal() {
     totalMensal,
     quantidadeAtivas: quantidade,
   };
+}
+
+export async function calcularGastosPorCategoria() {
+  const totais = await getTotaisPorCategoriaAtivas();
+  const totaisPorCategoria = new Map(
+    totais.map(({ categoria, _sum }) => [
+      categoria,
+      _sum.valor ? Number(_sum.valor.toFixed(2)) : 0,
+    ]),
+  );
+
+  return CATEGORIAS_VALIDAS.map((categoria) => ({
+    categoria,
+    total: totaisPorCategoria.get(categoria) ?? 0,
+  }));
 }
 
 function paraIndiceDeMes(data) {

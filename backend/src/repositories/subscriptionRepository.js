@@ -15,6 +15,14 @@ export async function getResumoAssinaturasAtivas() {
   };
 }
 
+export async function getTotaisPorCategoriaAtivas() {
+  return prisma.subscription.groupBy({
+    by: ['categoria'],
+    where: { status: STATUS_ATIVO },
+    _sum: { valor: true },
+  });
+}
+
 export async function getAssinaturasParaHistorico() {
   return prisma.subscription.findMany({
     select: {
