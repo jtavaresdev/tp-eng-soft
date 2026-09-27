@@ -226,5 +226,5 @@ export async function buscarProximasCobrancas({
         diasRestantes,
       };
     })
-    .filter((assinatura) => assinatura.diasRestantes === diasAlerta);
+    .filter((assinatura) => assinatura.diasRestantes <= diasAlerta);
 }
