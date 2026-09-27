@@ -29,3 +29,9 @@ export function createSubscription(dados) {
     body: JSON.stringify(dados),
   });
 }
+
+export function deleteSubscription(id) {
+  return request(`/subscriptions/${id}`, {
+    method: 'DELETE',
+  });
+}

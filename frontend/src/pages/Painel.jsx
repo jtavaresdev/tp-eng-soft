@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
-import { listSubscriptions, createSubscription } from '../services/api.js';
+import SubscriptionListItem from '../components/SubscriptionListItem.jsx';
+import { listSubscriptions, createSubscription, deleteSubscription } from '../services/api.js';
 import './Painel.css';
 
 const formatoMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -29,6 +30,15 @@ export default function Painel() {
     carregarAssinaturas();
   }
 
+  async function handleRemover(id) {
+    try {
+      await deleteSubscription(id);
+      await carregarAssinaturas();
+    } catch (err) {
+      setErroLista(err.message);
+    }
+  }
+
   return (
     <div className="sf-painel">
       <Nav tone="on-light" showCta={false} />
@@ -50,10 +60,12 @@ export default function Painel() {
 
           <ul className="sf-painel__lista">
             {assinaturas.map((assinatura) => (
-              <li key={assinatura.id} className="sf-painel__item">
-                <span className="sf-painel__item-nome">{assinatura.nome}</span>
-                <span className="sf-painel__item-valor">{formatoMoeda.format(assinatura.valor)}</span>
-              </li>
+              <SubscriptionListItem
+                key={assinatura.id}
+                assinatura={assinatura}
+                formatoMoeda={formatoMoeda}
+                onRemover={handleRemover}
+              />
             ))}
           </ul>
         </section>

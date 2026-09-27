@@ -48,6 +48,7 @@
 
 .sf-painel__item {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--sf-space-4);
   padding: var(--sf-space-3);
@@ -60,6 +61,7 @@
 .sf-painel__item-nome {
   font-weight: 600;
   color: var(--sf-ink);
+  flex: 1;
 }
 
 .sf-painel__item-valor {
