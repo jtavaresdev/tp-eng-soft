@@ -35,3 +35,12 @@ export function deleteSubscription(id) {
     method: 'DELETE',
   });
 }
+
+export async function getSubscriptionSummary() {
+  return request(
+    "/subscriptions/summary",
+    {
+      method: 'GET',
+    },
+  );
+}

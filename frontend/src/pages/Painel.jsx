@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
+import SummarySubscription from '../components/SummarySubscription.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
 import SubscriptionListItem from '../components/SubscriptionListItem.jsx';
+import { useSubscriptionSummary } from '../hooks/useSummary.js';
 import { listSubscriptions, createSubscription, deleteSubscription } from '../services/api.js';
 import './Painel.css';
 
@@ -11,6 +13,9 @@ export default function Painel() {
   const [assinaturas, setAssinaturas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erroLista, setErroLista] = useState(null);
+
+  const { resumo, carregando: carregandoResumo, erro: erroResumo, recarregarResumo } =
+  useSubscriptionSummary();
 
   const carregarAssinaturas = useCallback(() => {
     setCarregando(true);
@@ -25,6 +30,10 @@ export default function Painel() {
     carregarAssinaturas();
   }, [carregarAssinaturas]);
 
+  const atualizarListaEResumo = useCallback(() => {
+    return Promise.all([carregarAssinaturas(), recarregarResumo()]);
+  }, [carregarAssinaturas, recarregarResumo]);
+
   async function handleCriar(dados) {
     await createSubscription(dados);
     carregarAssinaturas();
@@ -33,7 +42,7 @@ export default function Painel() {
   async function handleRemover(id) {
     try {
       await deleteSubscription(id);
-      await carregarAssinaturas();
+      await atualizarListaEResumo();
     } catch (err) {
       setErroLista(err.message);
     }
@@ -44,6 +53,13 @@ export default function Painel() {
       <Nav tone="on-light" showCta={false} />
 
       <main className="sf-painel__content">
+        <SummarySubscription
+          resumo={resumo}
+          carregando={carregandoResumo}
+          erro={erroResumo}
+          formatoMoeda={formatoMoeda}
+        />
+ 
         <section className="sf-painel__card">
           <h1>Nova assinatura</h1>
           <SubscriptionForm onSubmit={handleCriar} />
@@ -65,6 +81,7 @@ export default function Painel() {
                 assinatura={assinatura}
                 formatoMoeda={formatoMoeda}
                 onRemover={handleRemover}
+                onAtualizado={atualizarListaEResumo}
               />
             ))}
           </ul>
