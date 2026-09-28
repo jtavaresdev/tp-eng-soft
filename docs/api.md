@@ -5,12 +5,14 @@
 **Formato:** JSON (`Content-Type: application/json`) em todas as requisições e respostas.
 
 > Este documento é a referência única do contrato entre frontend e backend. Qualquer mudança de rota, campo ou formato deve ser atualizada aqui **antes** de ser implementada, para evitar retrabalho de integração (risco apontado no Sprint 0).
+>
+> Reflete as rotas reais em `backend/src/routes/`. A seção de documentação da Home (`apiDocs.js`) deve ser mantida em sincronia com este arquivo.
 
 ---
 
 ## 1. Convenções gerais
 
-- Datas em `YYYY-MM-DD` (ex.: `2026-10-05`), horários em `HH:mm:ss` quando existirem.
+- Datas em `YYYY-MM-DD` (ex.: `2026-10-05`), horários em `YYYY-MM-DD HH:mm:ss` quando existirem.
 - Valores monetários como `number` (ex.: `39.90`), nunca string.
 - IDs são `integer` autoincremento.
 - Toda resposta de erro segue o mesmo formato (seção 2).
@@ -40,12 +42,12 @@
 {
   "id": 1,
   "nome": "Netflix",
-  "valor": 39.90,
+  "valor": 39.9,
   "data_cobranca": "2026-10-05",
-  "data_inicio": "2026-07-02",
+  "data_inicio": "2026-01-05",
   "categoria": "streaming",
   "status": "ativo",
-  "criado_em": "2026-09-01T12:00:00.000Z",
+  "criado_em": "2026-09-26 14:20:00",
   "cancelado_em": null
 }
 ```
@@ -54,25 +56,25 @@
 |---|---|---|---|
 | id | integer | gerado pelo servidor | — |
 | nome | string | sim | não vazio |
-| valor | number | sim | maior que 0 |
-| data_cobranca | string (date) | sim | dia do mês da cobrança/renovação |
-| data_inicio | string (date) \| null | sim para novos cadastros | data em que a assinatura começou de fato; registros legados podem ter `null` |
+| valor | number | sim | maior que 0 (ex.: `39.90`) |
+| data_cobranca | string (date) | sim | dia da cobrança/renovação, formato `AAAA-MM-DD` |
+| data_inicio | string (date) | sim para novos cadastros | data em que a assinatura começou de fato; usada no gráfico de evolução |
 | categoria | string (enum) | sim | ver seção 5 |
 | status | string (enum) | gerado pelo servidor | `ativo` \| `cancelado` |
 | criado_em | string (datetime) | gerado pelo servidor | data em que o registro foi criado no sistema |
-| cancelado_em | string (datetime) \| null | gerado pelo servidor | preenchido no DELETE |
+| cancelado_em | string (datetime) \| null | gerado pelo servidor | preenchido no cancelamento |
 
 ---
 
 ### `GET /subscriptions`
 
-Lista assinaturas, ordenadas por `data_cobranca` (crescente).
+Lista as assinaturas, ordenadas por `data_cobranca` (crescente). Quando não há resultados, devolve uma lista vazia (nunca erro).
 
 **Query params**
 
 | Param | Valores | Padrão | Observação |
 |---|---|---|---|
-| status | `ativo` \| `cancelado` \| `todos` | `ativo` | filtra por status |
+| status | `ativo` \| `cancelado` | `ativo` | filtra por status |
 
 **Exemplo:** `GET /subscriptions?status=ativo`
 
@@ -82,23 +84,20 @@ Lista assinaturas, ordenadas por `data_cobranca` (crescente).
   {
     "id": 1,
     "nome": "Netflix",
-    "valor": 39.90,
+    "valor": 39.9,
     "data_cobranca": "2026-10-05",
-    "data_inicio": "2026-07-02",
     "categoria": "streaming",
-    "status": "ativo",
-    "criado_em": "2026-09-01T12:00:00.000Z",
-    "cancelado_em": null
+    "status": "ativo"
   }
 ]
 ```
-Lista vazia (`[]`) quando não há resultados — **nunca** retorna erro nesse caso.
+Lista vazia (`[]`) quando não há resultados — **nunca** retorna erro nesse caso. (Campos restantes omitidos no exemplo.)
 
 ---
 
 ### `POST /subscriptions`
 
-Cria uma nova assinatura.
+Cria uma nova assinatura com status `"ativo"`.
 
 **Request body**
 ```json
@@ -106,70 +105,162 @@ Cria uma nova assinatura.
   "nome": "Netflix",
   "valor": 39.90,
   "data_cobranca": "2026-10-05",
-  "data_inicio": "2026-07-02",
+  "data_inicio": "2026-01-05",
   "categoria": "streaming"
 }
 ```
 
-`data_inicio` é obrigatório para novos cadastros e informa a data em que a assinatura começou de fato. `criado_em` continua sendo gerado pelo servidor.
+**Campos aceitos**
 
-**Resposta 201** — retorna o objeto criado (modelo `Subscription` completo, com `id`, `status: "ativo"` e `criado_em`).
+| Campo | Tipo | Descrição |
+|---|---|---|
+| nome | string | Obrigatório, não pode ser vazio. |
+| valor | number | Obrigatório, maior que zero (ex.: `39.90`). |
+| data_cobranca | string | Data da cobrança, no formato `AAAA-MM-DD`. |
+| data_inicio | string | Data em que a assinatura começou (`AAAA-MM-DD`). Usada no gráfico de evolução. |
+| categoria | string | `streaming`, `produtividade`, `jogos`, `academia` ou `outros`. |
 
-**Resposta 400** — exemplos:
-```json
-{ "error": "O campo 'nome' é obrigatório" }
-```
+**Resposta 201** — objeto criado (modelo `Subscription` completo, com `id`, `status: "ativo"` e `criado_em`).
+
+**Resposta 400** — exemplo:
 ```json
 { "error": "O campo 'valor' deve ser maior que zero" }
-```
-```json
-{ "error": "Categoria inválida. Use: streaming, produtividade, jogos, academia, outros" }
 ```
 
 ---
 
 ### `PUT /subscriptions/:id`
 
-Atualiza uma assinatura existente. Mesmas validações do `POST`.
+Atualiza uma assinatura existente. Usa as mesmas validações do cadastro, e o corpo precisa trazer todos os campos.
 
-**Request body** — mesmo formato do `POST` (todos os campos editáveis, incluindo `data_inicio`).
+**Path params**
+
+| Param | Descrição |
+|---|---|
+| id | ID da assinatura. |
+
+**Request body** — mesmo formato do `POST`.
 
 **Resposta 200** — objeto atualizado.
-**Resposta 404** — `{ "error": "Assinatura não encontrada" }`
 **Resposta 400** — mesmas mensagens do `POST`.
+**Resposta 404** — `{ "error": "Assinatura não encontrada" }`
 
 ---
 
 ### `DELETE /subscriptions/:id`
+**Alias:** `PATCH /subscriptions/:id/cancel`
 
-Remoção lógica: muda `status` para `cancelado` e preenche `cancelado_em` com o timestamp atual. Não apaga o registro (necessário para o histórico do gráfico, US7).
+Cancela a assinatura (remoção lógica): o `status` vira `"cancelado"` e `cancelado_em` é preenchido. O registro é mantido para o histórico.
+
+**Path params**
+
+| Param | Descrição |
+|---|---|
+| id | ID da assinatura. |
 
 **Resposta 200**
 ```json
 {
   "id": 1,
+  "nome": "Netflix",
+  "valor": 39.9,
+  "data_cobranca": "2026-10-05",
+  "data_inicio": "2026-01-05",
+  "categoria": "streaming",
   "status": "cancelado",
-  "cancelado_em": "2026-09-25T10:00:00.000Z"
+  "criado_em": "2026-09-26 14:20:00",
+  "cancelado_em": "2026-09-28 10:00:00"
 }
 ```
-**Resposta 404** — `{ "error": "Assinatura não encontrada" }`
+
+**Resposta 404** — `{ "error": "Assinatura não encontrada" }` (ID inexistente ou assinatura já cancelada).
 
 ---
 
-## 4. Recurso: Summary
+## 4. Resumo e cobranças
 
 ### `GET /subscriptions/summary`
 
-Retorna o total gasto por mês e a quantidade de assinaturas ativas (US3).
+Soma dos valores e quantidade das assinaturas ativas. Sem assinaturas, devolve zeros.
 
 **Resposta 200**
 ```json
 {
-  "total_mensal": 129.70,
-  "quantidade_ativas": 4
+  "totalMensal": 129.7,
+  "quantidadeAtivas": 4
 }
 ```
-Quando não há assinaturas ativas: `{ "total_mensal": 0, "quantidade_ativas": 0 }` (nunca erro).
+
+**Resposta 500**
+```json
+{ "error": "Não foi possível calcular o resumo das assinaturas." }
+```
+
+---
+
+### `GET /subscriptions/upcoming-charges`
+
+Lista as assinaturas ativas cuja próxima cobrança acontece exatamente daqui a N dias (`N = NOTIFY_DAYS_BEFORE` no `.env`, padrão 3).
+
+**Query params**
+
+| Param | Valores | Padrão | Observação |
+|---|---|---|---|
+| date | `AAAA-MM-DD` | hoje (UTC) | Data de referência. Opcional. |
+
+**Resposta 200**
+```json
+[
+  {
+    "id": 1,
+    "nome": "Netflix",
+    "valor": 39.9,
+    "proximaCobranca": "2026-10-05",
+    "diasRestantes": 3
+  }
+]
+```
+
+**Resposta 400**
+```json
+{ "error": "Parâmetro \"date\" inválido. Use o formato YYYY-MM-DD (ex: 2026-02-25)." }
+```
+
+**Resposta 500**
+```json
+{ "error": "Não foi possível calcular as próximas cobranças." }
+```
+
+---
+
+### `POST /subscriptions/notify-upcoming`
+
+Dispara manualmente o envio de e-mails de lembrete para as cobranças próximas. Útil para testar o SMTP sem esperar o agendamento. Se um envio falhar, o erro aparece em `resultados` (`sucesso: false`) e a resposta continua 200.
+
+**Resposta 200**
+```json
+{
+  "sucesso": true,
+  "quantidade": 1,
+  "resultados": [
+    {
+      "id": 1,
+      "nome": "Netflix",
+      "diasRestantes": 3,
+      "sucesso": true,
+      "messageId": "<abc123@smtp>"
+    }
+  ]
+}
+```
+
+**Resposta 500**
+```json
+{
+  "sucesso": false,
+  "erro": "Não foi possível disparar as notificações."
+}
+```
 
 ---
 
@@ -181,54 +272,71 @@ Enum fixo, validado no `POST` e `PUT` de subscriptions:
 streaming | produtividade | jogos | academia | outros
 ```
 
-### `GET /categories` *(opcional, facilita o `<select>` do frontend)*
-
-**Resposta 200**
-```json
-["streaming", "produtividade", "jogos", "academia", "outros"]
-```
-
 ---
 
 ## 6. Estatísticas
 
 ### `GET /stats/monthly-evolution`
 
-Gasto total por mês, considerando os últimos 12 meses. Uma assinatura ativa conta a partir do mês de `data_inicio`. Para registros legados com `data_inicio: null`, o cálculo usa `criado_em` como fallback. Se for cancelada, mantém os totais dos meses anteriores e deixa de contar a partir do mês do cancelamento. Suporta US7.
+Gasto total por mês nos últimos 12 meses, em ordem cronológica. Considera `data_inicio` e `cancelado_em` de cada assinatura. Suporta US7.
 
 **Resposta 200**
 ```json
 [
-  { "mes": "2025-10", "total": 89.80 },
-  { "mes": "2025-11", "total": 89.80 },
-  { "mes": "2025-12", "total": 129.70 }
+  { "mes": "2026-08", "total": 89.8 },
+  { "mes": "2026-09", "total": 129.7 }
 ]
 ```
+
 - `mes` no formato `YYYY-MM`, ordem cronológica crescente.
 - Meses sem nenhuma assinatura ativa retornam `"total": 0` (não pulam o mês).
+
+**Resposta 500**
+```json
+{ "error": "Não foi possível calcular o histórico mensal de gastos." }
+```
 
 ---
 
 ### `GET /stats/by-category`
 
-Total gasto por categoria, considerando apenas assinaturas ativas. Suporta US8.
+Total gasto por categoria, considerando apenas assinaturas ativas. Sempre devolve as 5 categorias, mesmo com total 0. Suporta US8.
 
 **Resposta 200**
 ```json
 [
-  { "categoria": "streaming", "total": 79.80 },
-  { "categoria": "produtividade", "total": 49.90 },
+  { "categoria": "streaming", "total": 79.8 },
+  { "categoria": "produtividade", "total": 49.9 },
   { "categoria": "jogos", "total": 0 },
   { "categoria": "academia", "total": 0 },
   { "categoria": "outros", "total": 0 }
 ]
 ```
+
 - Retorna todas as categorias do enum, mesmo com `total: 0` (o frontend decide se omite as zeradas no gráfico).
-- A soma de todos os `total` deve bater com `total_mensal` do `/subscriptions/summary`.
+- A soma de todos os `total` deve bater com `totalMensal` do `/subscriptions/summary`.
+
+**Resposta 500**
+```json
+{ "error": "Não foi possível calcular os gastos por categoria." }
+```
 
 ---
 
-## 7. Resumo de rotas
+## 7. Sistema
+
+### `GET /health`
+
+Retorna 200 quando o servidor está funcionando.
+
+**Resposta 200**
+```json
+{ "status": "ok" }
+```
+
+---
+
+## 8. Resumo de rotas
 
 | Método | Rota | História | Descrição |
 |---|---|---|---|
@@ -237,14 +345,18 @@ Total gasto por categoria, considerando apenas assinaturas ativas. Suporta US8.
 | POST | `/subscriptions` | US1 | Cria assinatura |
 | PUT | `/subscriptions/:id` | US5 | Edita assinatura |
 | DELETE | `/subscriptions/:id` | US6 | Cancela assinatura (lógico) |
+| PATCH | `/subscriptions/:id/cancel` | US6 | Alias para o cancelamento |
 | GET | `/subscriptions/summary` | US3 | Total mensal e quantidade ativas |
-| GET | `/categories` | US8 | Lista categorias válidas |
+| GET | `/subscriptions/upcoming-charges` | US4 | Cobranças nos próximos N dias |
+| POST | `/subscriptions/notify-upcoming` | US4 | Disparo manual dos e-mails de lembrete |
 | GET | `/stats/monthly-evolution` | US7 | Série mensal de gastos |
 | GET | `/stats/by-category` | US8 | Total por categoria |
 
 ---
 
-## 8. Pendente para as próximas sprints
+## 9. Pendente para as próximas sprints
 
-- Rotas de notificação (US4) não fazem parte deste contrato porque o job de e-mail (`node-cron`) não expõe endpoints REST na Sprint 1. Se for necessário um endpoint de disparo manual para teste (ex.: `POST /notifications/test-run`), adicionar aqui antes de implementar (ver issue US4-3).
 - Autenticação: fora de escopo (sistema single-user).
+- O job de e-mail (`node-cron`) roda em background; o endpoint `POST /subscriptions/notify-upcoming` existe apenas para disparo manual em testes.
+
+---
