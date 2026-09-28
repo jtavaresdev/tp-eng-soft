@@ -1,0 +1,29 @@
+.sf-monthly-chart {
+  min-height: 260px;
+  width: 100%;
+}
+
+.sf-monthly-chart__message {
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  margin: 0;
+  padding: var(--sf-space-6);
+  border: 1px dashed var(--sf-line);
+  color: var(--sf-muted);
+  font-family: var(--sf-font-body);
+  font-size: var(--sf-size-small);
+  text-align: center;
+}
+
+.sf-monthly-chart__message--erro {
+  border-color: var(--sf-alert);
+  color: var(--sf-alert);
+}
+
+@media (max-width: 480px) {
+  .sf-monthly-chart,
+  .sf-monthly-chart__message {
+    min-height: 220px;
+  }
+}

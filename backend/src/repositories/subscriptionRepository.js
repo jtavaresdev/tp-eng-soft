@@ -28,7 +28,9 @@ export async function getAssinaturasParaHistorico() {
     select: {
       valor: true,
       criado_em: true,
+      data_inicio: true,
       cancelado_em: true,
+      status: true,
     },
   });
 }

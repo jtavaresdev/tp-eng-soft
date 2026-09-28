@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Nav from '../components/Nav.jsx';
+import MonthlyEvolutionChart from '../components/MonthlyEvolutionChart.jsx';
 import SummarySubscription from '../components/SummarySubscription.jsx';
 import SubscriptionForm from '../components/SubscriptionForm.jsx';
 import SubscriptionListItem from '../components/SubscriptionListItem.jsx';
+import { useMonthlyEvolution } from '../hooks/useMonthlyEvolution.js';
 import { useSubscriptionSummary } from '../hooks/useSummary.js';
 import { listSubscriptions, createSubscription, updateSubscription, deleteSubscription } from '../services/api.js';
 import './Painel.css';
@@ -17,6 +19,12 @@ export default function Painel() {
 
   const { resumo, carregando: carregandoResumo, erro: erroResumo, recarregarResumo } =
   useSubscriptionSummary();
+  const {
+    historico,
+    carregando: carregandoHistorico,
+    erro: erroHistorico,
+    recarregarHistorico,
+  } = useMonthlyEvolution();
 
   const carregarAssinaturas = useCallback(() => {
     setCarregando(true);
@@ -31,13 +39,13 @@ export default function Painel() {
     carregarAssinaturas();
   }, [carregarAssinaturas]);
 
-  const atualizarListaEResumo = useCallback(() => {
-    return Promise.all([carregarAssinaturas(), recarregarResumo()]);
-  }, [carregarAssinaturas, recarregarResumo]);
+  const atualizarListaResumoEHistorico = useCallback(() => {
+    return Promise.all([carregarAssinaturas(), recarregarResumo(), recarregarHistorico()]);
+  }, [carregarAssinaturas, recarregarResumo, recarregarHistorico]);
 
   async function handleCriar(dados) {
     await createSubscription(dados);
-    await atualizarListaEResumo();
+    await atualizarListaResumoEHistorico();
   }
 
   async function handleSalvarEdicao(dados) {
@@ -47,17 +55,13 @@ export default function Painel() {
 
     await updateSubscription(assinaturaEditando.id, dados);
     setAssinaturaEditando(null);
-    await atualizarListaEResumo();
+    await atualizarListaResumoEHistorico();
   }
 
   async function handleRemover(id) {
     try {
       await deleteSubscription(id);
-
-      await Promise.all([
-        carregarAssinaturas(),
-        recarregarResumo(),
-      ]);
+      await atualizarListaResumoEHistorico();
     } catch (err) {
       setErroLista(err.message);
     }
@@ -106,6 +110,15 @@ export default function Painel() {
               />
             ))}
           </ul>
+        </section>
+
+        <section className="sf-painel__card sf-painel__card--grafico">
+          <h2>Evolução mensal</h2>
+          <MonthlyEvolutionChart
+            dados={historico}
+            carregando={carregandoHistorico}
+            erro={erroHistorico}
+          />
         </section>
       </main>
     </div>

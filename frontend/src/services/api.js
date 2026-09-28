@@ -51,3 +51,7 @@ export async function getSubscriptionSummary() {
     },
   );
 }
+
+export function getMonthlyEvolution() {
+  return request('/stats/monthly-evolution');
+}

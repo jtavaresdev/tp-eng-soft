@@ -44,6 +44,10 @@ export function validarAssinatura(dados = {}) {
     erros.push("O campo 'data_cobranca' deve estar no formato AAAA-MM-DD");
   }
 
+  if (!dados.data_inicio || !/^\d{4}-\d{2}-\d{2}$/.test(dados.data_inicio)) {
+    erros.push("O campo 'data_inicio' deve estar no formato AAAA-MM-DD");
+  }
+
   if (!CATEGORIAS_VALIDAS.includes(dados.categoria)) {
     erros.push(`Categoria inválida. Use: ${CATEGORIAS_VALIDAS.join(', ')}`);
   }
@@ -64,20 +68,20 @@ export function buscarAssinaturas(status = 'ativo') {
     .all(status);
 }
 
-export function criarAssinatura({ nome, valor, data_cobranca, categoria }) {
+export function criarAssinatura({ nome, valor, data_cobranca, data_inicio, categoria }) {
   const resultado = db
     .prepare(`
-      INSERT INTO subscriptions (nome, valor, data_cobranca, categoria)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO subscriptions (nome, valor, data_cobranca, data_inicio, categoria)
+      VALUES (?, ?, ?, ?, ?)
     `)
-    .run(nome.trim(), valor, data_cobranca, categoria);
+    .run(nome.trim(), valor, data_cobranca, data_inicio, categoria);
 
   return buscarAssinaturaPorId(resultado.lastInsertRowid);
 }
 
 export function atualizarAssinatura(
   id,
-  { nome, valor, data_cobranca, categoria },
+  { nome, valor, data_cobranca, data_inicio, categoria },
 ) {
   const existente = buscarAssinaturaPorId(id);
 
@@ -87,9 +91,9 @@ export function atualizarAssinatura(
 
   db.prepare(`
     UPDATE subscriptions
-    SET nome = ?, valor = ?, data_cobranca = ?, categoria = ?
+    SET nome = ?, valor = ?, data_cobranca = ?, data_inicio = ?, categoria = ?
     WHERE id = ?
-  `).run(nome.trim(), valor, data_cobranca, categoria, id);
+  `).run(nome.trim(), valor, data_cobranca, data_inicio, categoria, id);
 
   return buscarAssinaturaPorId(id);
 }
@@ -165,13 +169,21 @@ function gerarUltimos12Meses(referencia) {
 }
 
 function estavaAtivaNoMes(assinatura, indiceDoMes) {
-  const indiceInicio = paraIndiceDeMes(assinatura.criado_em);
-  const indiceFim = assinatura.cancelado_em ? paraIndiceDeMes(assinatura.cancelado_em) : null;
+  const indiceInicio = paraIndiceDeMes(assinatura.data_inicio ?? assinatura.criado_em);
 
-  const jaFoiCriada = indiceInicio <= indiceDoMes;
-  const aindaNaoFoiCancelada = indiceFim === null || indiceDoMes <= indiceFim;
+  if (indiceInicio > indiceDoMes) {
+    return false;
+  }
 
-  return jaFoiCriada && aindaNaoFoiCancelada;
+  if (assinatura.status === 'ativo') {
+    return true;
+  }
+
+  if (assinatura.status !== 'cancelado' || !assinatura.cancelado_em) {
+    return false;
+  }
+
+  return indiceDoMes < paraIndiceDeMes(assinatura.cancelado_em);
 }
 
 export async function calcularHistoricoMensal(referencia = new Date()) {

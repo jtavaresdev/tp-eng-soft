@@ -42,6 +42,7 @@
   "nome": "Netflix",
   "valor": 39.90,
   "data_cobranca": "2026-10-05",
+  "data_inicio": "2026-07-02",
   "categoria": "streaming",
   "status": "ativo",
   "criado_em": "2026-09-01T12:00:00.000Z",
@@ -55,9 +56,10 @@
 | nome | string | sim | não vazio |
 | valor | number | sim | maior que 0 |
 | data_cobranca | string (date) | sim | dia do mês da cobrança/renovação |
+| data_inicio | string (date) \| null | sim para novos cadastros | data em que a assinatura começou de fato; registros legados podem ter `null` |
 | categoria | string (enum) | sim | ver seção 5 |
 | status | string (enum) | gerado pelo servidor | `ativo` \| `cancelado` |
-| criado_em | string (datetime) | gerado pelo servidor | — |
+| criado_em | string (datetime) | gerado pelo servidor | data em que o registro foi criado no sistema |
 | cancelado_em | string (datetime) \| null | gerado pelo servidor | preenchido no DELETE |
 
 ---
@@ -82,6 +84,7 @@ Lista assinaturas, ordenadas por `data_cobranca` (crescente).
     "nome": "Netflix",
     "valor": 39.90,
     "data_cobranca": "2026-10-05",
+    "data_inicio": "2026-07-02",
     "categoria": "streaming",
     "status": "ativo",
     "criado_em": "2026-09-01T12:00:00.000Z",
@@ -103,9 +106,12 @@ Cria uma nova assinatura.
   "nome": "Netflix",
   "valor": 39.90,
   "data_cobranca": "2026-10-05",
+  "data_inicio": "2026-07-02",
   "categoria": "streaming"
 }
 ```
+
+`data_inicio` é obrigatório para novos cadastros e informa a data em que a assinatura começou de fato. `criado_em` continua sendo gerado pelo servidor.
 
 **Resposta 201** — retorna o objeto criado (modelo `Subscription` completo, com `id`, `status: "ativo"` e `criado_em`).
 
@@ -126,7 +132,7 @@ Cria uma nova assinatura.
 
 Atualiza uma assinatura existente. Mesmas validações do `POST`.
 
-**Request body** — mesmo formato do `POST` (todos os campos editáveis).
+**Request body** — mesmo formato do `POST` (todos os campos editáveis, incluindo `data_inicio`).
 
 **Resposta 200** — objeto atualizado.
 **Resposta 404** — `{ "error": "Assinatura não encontrada" }`
@@ -188,7 +194,7 @@ streaming | produtividade | jogos | academia | outros
 
 ### `GET /stats/monthly-evolution`
 
-Gasto total por mês, considerando os últimos 12 meses. Uma assinatura conta em um mês se estava ativa em algum momento dele (entre `criado_em` e `cancelado_em`, ou ainda ativa). Suporta US7.
+Gasto total por mês, considerando os últimos 12 meses. Uma assinatura ativa conta a partir do mês de `data_inicio`. Para registros legados com `data_inicio: null`, o cálculo usa `criado_em` como fallback. Se for cancelada, mantém os totais dos meses anteriores e deixa de contar a partir do mês do cancelamento. Suporta US7.
 
 **Resposta 200**
 ```json

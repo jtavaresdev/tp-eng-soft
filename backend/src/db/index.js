@@ -29,6 +29,7 @@ db.exec(`
     nome TEXT NOT NULL,
     valor REAL NOT NULL,
     data_cobranca TEXT NOT NULL,
+    data_inicio TEXT,
     categoria TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'ativo',
     criado_em TEXT NOT NULL DEFAULT (datetime('now')),
