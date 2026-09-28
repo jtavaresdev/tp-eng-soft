@@ -12,7 +12,7 @@ export default function Nav({ tone = 'on-light', showCta = true, ctaTo = '/paine
     <header className={`sf-nav ${tone}`}>
       <nav className="sf-nav__side">
         <Link to="/">Início</Link>
-        <a href="#docs">Docs</a>
+        <Link to="/#docs">Docs</Link>
       </nav>
 
       <Link to="/" className="sf-nav__logo">

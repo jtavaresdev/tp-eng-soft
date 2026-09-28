@@ -27,3 +27,14 @@ a {
 button {
   font: inherit;
 }
+
+/* Rolagem suave ao clicar em "Ver documentação" e nos links da sidebar */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
