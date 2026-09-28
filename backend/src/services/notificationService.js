@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import nodemailer from 'nodemailer';
 
 import { buscarProximasCobrancas } from './subscriptionsService.js';
+import { montarLembreteEmail } from './mail/template/templateLembrete.js';
 import { hojeUTC } from '../util/dateUtils.js';
 import {
   claimNotification,
@@ -57,24 +58,6 @@ export function criarTransporter({ env = process.env, logger = console } = {}) {
   return nodemailer.createTransport(opcoes);
 }
 
-function formatarValor(valor) {
-  return Number(valor).toFixed(2).replace('.', ',');
-}
-
-function montarMensagem(assinatura) {
-  const dias = assinatura.diasRestantes;
-  const unidade = dias === 1 ? 'dia' : 'dias';
-
-  return [
-    `Lembrete de renovação: ${assinatura.nome}`,
-    '',
-    `A assinatura será renovada em ${dias} ${unidade}, no dia ${assinatura.proximaCobranca}.`,
-    `Valor: R$ ${formatarValor(assinatura.valor)}.`,
-    '',
-    'Mensagem enviada pelo Gerenciador de Assinaturas.',
-  ].join('\n');
-}
-
 export async function enviarLembrete(
   assinatura,
   { transporter, destinatario = process.env.NOTIFY_EMAIL_TO } = {},
@@ -87,11 +70,18 @@ export async function enviarLembrete(
     throw new Error('Transporter de e-mail não configurado.');
   }
 
+  const { assunto, texto, html } = montarLembreteEmail({
+    nome: assinatura.nome,
+    valor: assinatura.valor,
+    dataCobranca: assinatura.proximaCobranca,
+  });
+
   return transporter.sendMail({
     from: process.env.MAIL_FROM || 'Gerenciador de Assinaturas <no-reply@localhost>',
     to: destinatario,
-    subject: `Lembrete de renovação: ${assinatura.nome}`,
-    text: montarMensagem(assinatura),
+    subject: assunto,
+    text: texto,
+    html,
   });
 }
 
