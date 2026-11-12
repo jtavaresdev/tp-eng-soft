@@ -134,6 +134,19 @@ Garante que tenha instalado no teu ambiente:
 * **Backend:** http://localhost:3001 (ou em outra porta definida no `.env`)
 * **Frontend:** http://localhost:5173
 
+## Testes
+
+```bash
+npm test                   # unidade + integração (Vitest + Supertest)
+npm run test:coverage      # com relatório de cobertura (mínimo de 80%)
+npm run test:e2e:install   # baixa o Chromium do Playwright (uma vez)
+npm run test:e2e           # end-to-end (Playwright)
+```
+
+Guia de escrita, convenções e divisão entre o time: [docs/testes.md](docs/testes.md).
+
+---
+
 ## Documentação em UML
 
 > Diagramas em [Mermaid](https://mermaid.js.org/), renderizados automaticamente pelo GitHub. Gerados com apoio de IA a partir do código do backend, e revisados pelo time antes de entrar no repositório.
