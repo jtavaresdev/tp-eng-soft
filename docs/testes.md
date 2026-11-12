@@ -86,3 +86,71 @@ A sugestão de responsável segue quem mais mexeu em cada parte do código; o E2
 
 O limite global de 80% só fica verde quando as quatro áreas terminarem; até lá, `npm run test:coverage` termina com erro de cobertura — isso é esperado.
 
+## Issues para o GitHub Projects
+
+Uma issue por área. Título e corpo prontos para colar.
+
+### Issue 1
+
+**Título:** `test: assinaturas (CRUD) + E2E de remoção`
+
+```markdown
+Área 1 do guia `docs/testes.md` — US1, US2, US5, US6.
+
+**Código coberto:** `validarAssinatura`, `criarAssinatura`, `buscarAssinaturas`, `atualizarAssinatura`, `cancelarAssinatura` (`subscriptionsService.js`) e as rotas `POST/GET/PUT/DELETE /subscriptions` e `PATCH /subscriptions/:id/cancel` (`subscriptionsController.js`).
+
+- [ ] `backend/tests/unit/validarAssinatura.test.js` — implementar os `it.todo`
+- [ ] `backend/tests/integration/subscriptions.test.js` — implementar os `it.todo`
+- [ ] `e2e/remover-assinatura.spec.js` — implementar o teste E2E
+- [ ] `npm test` e `npm run test:e2e` passando
+- [ ] Arquivos da área com cobertura >= 80% em `npm run test:coverage`
+```
+
+### Issue 2
+
+**Título:** `test: datas, próximas cobranças e e-mail + E2E do resumo mensal`
+
+```markdown
+Área 2 do guia `docs/testes.md` — US4.
+
+**Código coberto:** `util/dateUtils.js`, `buscarProximasCobrancas` (`subscriptionsService.js`), `services/mail/` (`emailService.js`, `mailer.js`, `templateLembrete.js`) e as rotas `GET /subscriptions/upcoming-charges` e `POST /subscriptions/notify-upcoming`.
+
+- [ ] `backend/tests/unit/dateUtils.test.js` — implementar os `it.todo`
+- [ ] `backend/tests/unit/email.test.js` — implementar os `it.todo`
+- [ ] `backend/tests/integration/upcomingCharges.test.js` — implementar os `it.todo`
+- [ ] `e2e/resumo-mensal.spec.js` — implementar o teste E2E
+- [ ] `npm test` e `npm run test:e2e` passando
+- [ ] Arquivos da área com cobertura >= 80% em `npm run test:coverage`
+```
+
+### Issue 3
+
+**Título:** `test: resumo e estatísticas + E2E de cadastro`
+
+```markdown
+Área 3 do guia `docs/testes.md` — US3, US7, US8.
+
+**Código coberto:** `calcularResumoMensal`, `calcularGastosPorCategoria`, `calcularHistoricoMensal` (`subscriptionsService.js`), `subscriptionRepository.js`, `statsController.js` e as rotas `GET /subscriptions/summary`, `GET /stats/by-category` e `GET /stats/monthly-evolution`.
+
+- [ ] `backend/tests/unit/historicoMensal.test.js` — implementar os `it.todo`
+- [ ] `backend/tests/integration/stats.test.js` — implementar os `it.todo`
+- [ ] `e2e/cadastrar-assinatura.spec.js` — implementar o teste E2E
+- [ ] `npm test` e `npm run test:e2e` passando
+- [ ] Arquivos da área com cobertura >= 80% em `npm run test:coverage`
+```
+
+### Issue 4
+
+**Título:** `test: job de notificações + E2E de edição`
+
+```markdown
+Área 4 do guia `docs/testes.md` — US4.
+
+**Código coberto:** `notificationService.js` (`criarTransporter`, `enviarLembrete`, `executarJobNotificacoes`, agendamento), `notificationRepository.js`, `notificationsController.js` e a rota `POST /notifications/test-run`.
+
+- [ ] `backend/tests/unit/notificationService.test.js` — implementar os `it.todo`
+- [ ] `backend/tests/integration/notificationJob.test.js` — implementar os `it.todo`
+- [ ] `e2e/editar-assinatura.spec.js` — implementar o teste E2E
+- [ ] `npm test` e `npm run test:e2e` passando
+- [ ] Arquivos da área com cobertura >= 80% em `npm run test:coverage`
+```
