@@ -72,3 +72,8 @@ desktop.ini
 .agents/
 .claude/
 .windsurf/
+
+# --- Testes E2E (Playwright) ---
+test-results/
+playwright-report/
+blob-report/
