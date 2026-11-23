@@ -88,10 +88,47 @@ describe('criarTransporter', () => {
 });
 
 describe('enviarLembrete', () => {
-  it.todo('lança erro quando não há destinatário');
-  it.todo('lança erro quando não há transporter');
-  it.todo('chama sendMail com from, to, subject, text e html do lembrete');
-  it.todo('usa o remetente padrão quando MAIL_FROM não está definido (vi.stubEnv)');
+  const assinatura = {
+    nome: 'Netflix',
+    valor: 39.9,
+    proximaCobranca: '2026-10-05',
+  };
+
+  it('lança erro quando não há destinatário', async () => {
+    await expect(enviarLembrete(assinatura, { destinatario: '', transporter: { sendMail: vi.fn() } }))
+      .rejects.toThrow('NOTIFY_EMAIL_TO não configurado.');
+  });
+
+  it('lança erro quando não há transporter', async () => {
+    await expect(enviarLembrete(assinatura, { destinatario: 'destino@exemplo.com' }))
+      .rejects.toThrow('Transporter de e-mail não configurado.');
+  });
+
+  it('chama sendMail com from, to, subject, text e html do lembrete', async () => {
+    const transporter = { sendMail: vi.fn().mockResolvedValue({ messageId: 'abc' }) };
+
+    await enviarLembrete(assinatura, { transporter, destinatario: 'cliente@exemplo.com' });
+
+    expect(transporter.sendMail).toHaveBeenCalledOnce();
+    expect(transporter.sendMail).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'SubFlow Teste <no-reply@exemplo.com>',
+      to: 'cliente@exemplo.com',
+      subject: expect.stringContaining('Netflix'),
+      text: expect.stringContaining('Netflix'),
+      html: expect.stringContaining('Netflix'),
+    }));
+  });
+
+  it('usa o remetente padrão quando MAIL_FROM não está definido (vi.stubEnv)', async () => {
+    vi.stubEnv('MAIL_FROM', '');
+    const transporter = { sendMail: vi.fn().mockResolvedValue({}) };
+
+    await enviarLembrete(assinatura, { transporter, destinatario: 'cliente@exemplo.com' });
+
+    expect(transporter.sendMail).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'Gerenciador de Assinaturas <no-reply@localhost>',
+    }));
+  });
 });
 
 describe('iniciarAgendamentoNotificacoes', () => {
