@@ -127,5 +127,74 @@ describe('executarJobNotificacoes', () => {
     expect(transporter.sendMail).not.toHaveBeenCalled();
   });
 });
+describe('POST /notifications/test-run', () => {
+  it('executa o job em dry-run e responde 200 com o resumo', async () => {
+    inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
 
-// Já importado para os casos acima: api.
+    const resposta = await api.post('/notifications/test-run').send({
+      date: '2026-10-03',
+      diasAlerta: 3,
+    });
+
+    expect(resposta.status).toBe(200);
+    expect(resposta.body).toMatchObject({
+      diasAlerta: 3,
+      encontradas: 1,
+      enviadas: 1,
+      ignoradas: 0,
+      falhas: 0,
+    });
+    expect(resposta.body.resultados[0]).toMatchObject({ nome: 'Netflix', status: 'sent' });
+  });
+
+  it('aceita "date" e "diasAlerta" no corpo ou na query string', async () => {
+    inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
+
+    const peloCorpo = await api.post('/notifications/test-run').send({
+      date: '2026-10-03',
+      diasAlerta: 2,
+    });
+    const pelaQuery = await api.post('/notifications/test-run?date=2026-10-03&diasAlerta=2');
+
+    expect(peloCorpo.status).toBe(200);
+    expect(peloCorpo.body).toMatchObject({ diasAlerta: 2, encontradas: 1, enviadas: 1 });
+    expect(pelaQuery.status).toBe(200);
+    expect(pelaQuery.body).toMatchObject({ diasAlerta: 2, encontradas: 1, ignoradas: 1 });
+    expect(pelaQuery.body.resultados[0]).toMatchObject({ cicloCobranca: '2026-10-05', status: 'skipped' });
+  });
+
+  it('responde 400 quando "date" é inválido', async () => {
+    const resposta = await api.post('/notifications/test-run').send({ date: '05/10/2026' });
+
+    expect(resposta.status).toBe(400);
+    expect(resposta.body.error).toContain('Parâmetro "date" inválido');
+  });
+
+  it.each(['-1', '1.5', 'abc'])(
+    'responde 400 quando "diasAlerta" não é um inteiro >= 0 (%s)',
+    async (diasAlerta) => {
+      const resposta = await api.post('/notifications/test-run').send({ diasAlerta });
+
+      expect(resposta.status).toBe(400);
+      expect(resposta.body).toEqual({
+        error: 'O campo "diasAlerta" deve ser um inteiro maior ou igual a zero.',
+      });
+    },
+  );
+
+  it('responde 500 com o resumo quando algum lembrete falha', async () => {
+    inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
+    vi.stubEnv('NOTIFY_DRY_RUN', 'false');
+    vi.stubEnv('SMTP_HOST', '');
+
+    const resposta = await api.post('/notifications/test-run').send({ date: '2026-10-03' });
+
+    expect(resposta.status).toBe(500);
+    expect(resposta.body).toMatchObject({
+      error: 'O job foi executado, mas alguns lembretes não foram enviados.',
+      encontradas: 1,
+      falhas: 1,
+    });
+    expect(resposta.body.resultados[0]).toMatchObject({ status: 'failed' });
+  });
+});
