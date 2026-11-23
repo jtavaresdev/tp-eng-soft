@@ -76,12 +76,56 @@ describe('executarJobNotificacoes', () => {
     expect(entrega).toMatchObject({ status: 'failed', erro: 'SMTP indisponível' });
   });
 
-describe('POST /notifications/test-run', () => {
-  it.todo('executa o job em dry-run e responde 200 com o resumo');
-  it.todo('aceita "date" e "diasAlerta" no corpo ou na query string');
-  it.todo('responde 400 quando "date" é inválido');
-  it.todo('responde 400 quando "diasAlerta" não é um inteiro >= 0');
-  it.todo('responde 500 com o resumo quando algum lembrete falha');
+  it('tenta de novo no mesmo ciclo quando a entrega anterior falhou', async () => {
+    inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
+    const transporter = {
+      sendMail: vi.fn()
+        .mockRejectedValueOnce(new Error('falha temporária'))
+        .mockResolvedValueOnce({ messageId: 'recuperado' }),
+    };
+
+    const primeira = await executarJobNotificacoes({ referencia: REFERENCIA, transporter });
+    const segunda = await executarJobNotificacoes({ referencia: REFERENCIA, transporter });
+    const entrega = db.prepare('SELECT * FROM notification_deliveries').get();
+
+    expect(primeira.falhas).toBe(1);
+    expect(segunda).toMatchObject({ encontradas: 1, enviadas: 1, falhas: 0 });
+    expect(entrega.status).toBe('sent');
+    expect(entrega.erro).toBeNull();
+    expect(transporter.sendMail).toHaveBeenCalledTimes(2);
+  });
+
+  it('marca todas como falha quando o SMTP não está configurado e não há transporter', async () => {
+    const assinatura = inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
+    vi.stubEnv('NOTIFY_DRY_RUN', 'false');
+    vi.stubEnv('SMTP_HOST', '');
+    vi.stubEnv('SMTP_PORT', '587');
+
+    const resumo = await executarJobNotificacoes({ referencia: REFERENCIA });
+    const entrega = db.prepare('SELECT * FROM notification_deliveries WHERE subscription_id = ?')
+      .get(assinatura.id);
+
+    expect(resumo).toMatchObject({ encontradas: 1, enviadas: 0, ignoradas: 0, falhas: 1 });
+    expect(resumo.resultados[0]).toMatchObject({
+      status: 'failed',
+      erro: 'SMTP não configurado. Informe SMTP_HOST e SMTP_PORT.',
+    });
+    expect(entrega).toBeUndefined();
+  });
+
+  it('respeita o parâmetro diasAlerta', async () => {
+    inserirAssinatura({ nome: 'Netflix', data_cobranca: '2026-01-05' });
+    const transporter = criarTransporterFalso();
+
+    const resumo = await executarJobNotificacoes({
+      referencia: REFERENCIA,
+      diasAlerta: 1,
+      transporter,
+    });
+
+    expect(resumo).toMatchObject({ diasAlerta: 1, encontradas: 0, enviadas: 0 });
+    expect(transporter.sendMail).not.toHaveBeenCalled();
+  });
 });
 
 // Já importado para os casos acima: api.
