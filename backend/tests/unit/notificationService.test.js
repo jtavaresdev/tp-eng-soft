@@ -4,8 +4,9 @@
 //
 // Teste de UNIDADE com INJEÇÃO de dependência: as funções recebem `env`,
 // `logger` e `transporter` por parâmetro, então basta passar dublês.
-// Para implementar um caso, troque `it.todo('...')` por `it('...', async () => { ... })`.
+// Os testes usam dublês para e-mail e ambiente; nenhum envio real é feito.
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import nodemailer from 'nodemailer';
 import {
   criarTransporter,
   enviarLembrete,
@@ -13,8 +14,18 @@ import {
   pararAgendamentoNotificacoes,
 } from '../../src/services/notificationService.js';
 
+const { createTransportMock } = vi.hoisted(() => ({
+  createTransportMock: vi.fn((opcoes) => ({ opcoes })),
+}));
+
+vi.mock('nodemailer', () => ({
+  default: { createTransport: createTransportMock },
+}));
+
 afterEach(() => {
   pararAgendamentoNotificacoes(); // nenhum cron pode ficar ligado entre testes
+  vi.unstubAllEnvs();
+  createTransportMock.mockClear();
 });
 
 describe('criarTransporter', () => {
@@ -29,10 +40,51 @@ describe('criarTransporter', () => {
     expect(logger.log).toHaveBeenCalledOnce();
   });
 
-  it.todo('lança erro quando SMTP_HOST não está configurado');
-  it.todo('lança erro quando SMTP_PORT é inválida');
-  it.todo('lança erro quando só SMTP_USER ou só SMTP_PASS é informado');
-  it.todo('cria um transporter SMTP real quando a configuração está completa');
+  it('lança erro quando SMTP_HOST não está configurado', () => {
+    expect(() => criarTransporter({ env: { SMTP_PORT: '587' } }))
+      .toThrow('SMTP não configurado. Informe SMTP_HOST e SMTP_PORT.');
+  });
+
+  it('lança erro quando SMTP_PORT é inválida', () => {
+    expect(() => criarTransporter({ env: { SMTP_HOST: 'smtp.exemplo.com', SMTP_PORT: '587.5' } }))
+      .toThrow('SMTP não configurado. Informe SMTP_HOST e SMTP_PORT.');
+  });
+
+  it('lança erro quando só SMTP_USER ou só SMTP_PASS é informado', () => {
+    const envBase = { SMTP_HOST: 'smtp.exemplo.com', SMTP_PORT: '465' };
+
+    expect(() => criarTransporter({ env: { ...envBase, SMTP_USER: 'usuario' } }))
+      .toThrow('SMTP_USER e SMTP_PASS devem ser informados juntos.');
+    expect(() => criarTransporter({ env: { ...envBase, SMTP_PASS: 'senha' } }))
+      .toThrow('SMTP_USER e SMTP_PASS devem ser informados juntos.');
+  });
+
+  it('delega ao Nodemailer com a configuração SMTP completa', () => {
+    const transporter = criarTransporter({
+      env: {
+        SMTP_HOST: ' smtp.exemplo.com ',
+        SMTP_PORT: '465',
+        SMTP_SECURE: 'true',
+        SMTP_USER: ' usuario ',
+        SMTP_PASS: 'senha',
+      },
+    });
+
+    expect(nodemailer.createTransport).toHaveBeenCalledWith({
+      host: 'smtp.exemplo.com',
+      port: 465,
+      secure: true,
+      auth: { user: 'usuario', pass: 'senha' },
+    });
+    expect(transporter).toEqual({
+      opcoes: {
+        host: 'smtp.exemplo.com',
+        port: 465,
+        secure: true,
+        auth: { user: 'usuario', pass: 'senha' },
+      },
+    });
+  });
 });
 
 describe('enviarLembrete', () => {
