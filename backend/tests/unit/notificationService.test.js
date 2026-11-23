@@ -132,10 +132,40 @@ describe('enviarLembrete', () => {
 });
 
 describe('iniciarAgendamentoNotificacoes', () => {
-  it.todo('retorna null quando NOTIFICATION_SCHEDULER_ENABLED é "false"');
-  it.todo('lança erro quando a expressão cron é inválida (vi.stubEnv para habilitar)');
-  it.todo('agenda a tarefa e devolve a mesma tarefa em uma segunda chamada');
-  it.todo('permite agendar de novo depois de pararAgendamentoNotificacoes()');
-});
+  it('retorna null quando NOTIFICATION_SCHEDULER_ENABLED é "false"', () => {
+    vi.stubEnv('NOTIFICATION_SCHEDULER_ENABLED', 'false');
 
-// Já importados para os casos acima: enviarLembrete, iniciarAgendamentoNotificacoes.
+    expect(iniciarAgendamentoNotificacoes()).toBeNull();
+  });
+
+  it('lança erro quando a expressão cron é inválida (vi.stubEnv para habilitar)', () => {
+    vi.stubEnv('NOTIFICATION_SCHEDULER_ENABLED', 'true');
+
+    expect(() => iniciarAgendamentoNotificacoes({ schedule: 'cron inválido' }))
+      .toThrow('CRON_SCHEDULE inválido: cron inválido');
+  });
+
+  it('agenda a tarefa e devolve a mesma tarefa em uma segunda chamada', () => {
+    vi.stubEnv('NOTIFICATION_SCHEDULER_ENABLED', 'true');
+    const logger = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const primeira = iniciarAgendamentoNotificacoes({ schedule: '0 8 * * *', timezone: 'UTC' });
+    const segunda = iniciarAgendamentoNotificacoes({ schedule: '0 9 * * *', timezone: 'UTC' });
+
+    expect(primeira).toBeTruthy();
+    expect(segunda).toBe(primeira);
+    expect(logger).toHaveBeenCalledOnce();
+  });
+
+  it('permite agendar de novo depois de pararAgendamentoNotificacoes()', () => {
+    vi.stubEnv('NOTIFICATION_SCHEDULER_ENABLED', 'true');
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const primeira = iniciarAgendamentoNotificacoes({ schedule: '0 8 * * *', timezone: 'UTC' });
+    pararAgendamentoNotificacoes();
+    const segunda = iniciarAgendamentoNotificacoes({ schedule: '0 9 * * *', timezone: 'UTC' });
+
+    expect(segunda).toBeTruthy();
+    expect(segunda).not.toBe(primeira);
+  });
+});
