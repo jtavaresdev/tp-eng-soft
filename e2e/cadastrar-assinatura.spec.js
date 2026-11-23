@@ -1,17 +1,29 @@
-// E2E — Cadastrar assinatura (US1, US2, US8)
-//
-// Para implementar: troque `test.fixme` por `test` e escreva os passos.
-// Rode só este arquivo com: npx playwright test e2e/cadastrar-assinatura.spec.js
+// E2E — Cadastrar assinatura (US1, US2, US8), conforme docs/testes.md.
 import { abrirPainel, dadosAssinatura, expect, itemDaLista, preencherFormulario, test } from './helpers.js';
 
-test.fixme('usuário cadastra uma assinatura e ela aparece na lista', async ({ page }) => {
-  // 1. Abrir o painel (abrirPainel) — ele começa vazio.
-  // 2. Preencher o formulário "Nova assinatura" (preencherFormulario + dadosAssinatura).
-  // 3. Clicar em "Cadastrar assinatura".
-  // 4. Verificar que o item aparece em "Assinaturas ativas" com nome, categoria
-  //    e valor em reais (itemDaLista).
-  // 5. Verificar que o aviso "Nenhuma assinatura cadastrada ainda." sumiu
-  //    e que o formulário voltou a ficar em branco.
-  // 6. Recarregar a página (page.reload) e verificar que o item continua lá
-  //    (ou seja, foi salvo no backend de verdade).
+test('usuário cadastra uma assinatura e ela aparece na lista', async ({ page }) => {
+  const dados = dadosAssinatura();
+  await abrirPainel(page);
+  const avisoVazio = page.getByText('Nenhuma assinatura cadastrada ainda.', { exact: true });
+  await expect(avisoVazio).toBeVisible();
+
+  await preencherFormulario(page, dados);
+  await page.getByRole('button', { name: 'Cadastrar assinatura', exact: true }).click();
+
+  const item = itemDaLista(page, dados.nome);
+  await expect(item).toHaveCount(1);
+  await expect(item).toBeVisible();
+  await expect(item).toContainText(dados.categoria);
+  await expect(item).toContainText(/R\$\s*39,90/);
+  await expect(avisoVazio).toHaveCount(0);
+  for (const campo of ['Nome', 'Valor (R$)', 'Data de cobrança', 'Data de início', 'Categoria']) {
+    await expect(page.getByLabel(campo, { exact: true })).toHaveValue('');
+  }
+
+  await page.reload();
+  await expect(item).toHaveCount(1);
+  await expect(item).toBeVisible();
+  await expect(item).toContainText(dados.categoria);
+  await expect(item).toContainText(/R\$\s*39,90/);
+  await expect(avisoVazio).toHaveCount(0);
 });
